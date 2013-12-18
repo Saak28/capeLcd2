@@ -30,20 +30,29 @@
 			{
 				pinctrl-single,pins = <
 
-				0x090 0x0F  /* P8_07 66 INPUT  MODE7 - D0 */
-				0x094 0x0F  /* P8_08 67 INPUT  MODE7 - D1 */
-				0x09C 0x0F  /* P8_09 69 INPUT  MODE7 - D2 */
-				0x098 0x0F  /* P8_10 68 INPUT  MODE7 - D3 */
-				0x034 0x0F  /* P8_11 45 INPUT  MODE7 - D4 */
-				0x030 0x0F  /* P8_12 44 INPUT  MODE7 - D5 */
-				0x024 0x0F  /* P8_13 23 INPUT  MODE7 - D6 */
-				0x028 0x0F  /* P8_14 26 INPUT  MODE7 - D7 */
+				0x090 0x0F  /* P8_07  66 INPUT  MODE7 - D0  */
+				0x094 0x0F  /* P8_08  67 INPUT  MODE7 - D1  */
+				0x09C 0x0F  /* P8_09  69 INPUT  MODE7 - D2  */
+				0x098 0x0F  /* P8_10  68 INPUT  MODE7 - D3  */
+				0x034 0x0F  /* P8_11  45 INPUT  MODE7 - D4  */
+				0x030 0x0F  /* P8_12  44 INPUT  MODE7 - D5  */
+				0x024 0x0F  /* P8_13  23 INPUT  MODE7 - D6  */
+				0x028 0x0F  /* P8_14  26 INPUT  MODE7 - D7  */
 
-				0x040 0x7F  /* P9_15 48 OUTPUT MODE7 - CS */
-				0x044 0x7F  /* P9_23 49 OUTPUT MODE7 - DC */
-				0x048 0x7F  /* P9_14 50 OUTPUT MODE7 - WR */
-				0x04C 0x7F  /* P9_16 51 OUTPUT MODE7 - RD */
-				0x078 0x7F  /* P9_12 60 OUTPUT MODE7 - RS */
+				0x03C 0x0F  /* P8_15  47 INPUT  MODE7 - D8  */
+				0x038 0x0F  /* P8_16  46 INPUT  MODE7 - D9  */
+				0x02C 0x0F  /* P8_17  27 INPUT  MODE7 - D10 */
+				0x08C 0x0F  /* P8_18  65 INPUT  MODE7 - D11 */
+				0x020 0x0F  /* P8_19  22 INPUT  MODE7 - D12 */
+				0x07C 0x0F  /* P8_26  61 INPUT  MODE7 - D13 */
+				0x070 0x0F  /* P9_11  30 INPUT  MODE7 - D14 */
+				0x1A4 0x0F  /* P9_27 115 INPUT  MODE7 - D15 */
+
+				0x040 0x7F  /* P9_15  48 OUTPUT MODE7 - CS  */
+				0x044 0x7F  /* P9_23  49 OUTPUT MODE7 - DC  */
+				0x048 0x7F  /* P9_14  50 OUTPUT MODE7 - WR  */
+				0x04C 0x7F  /* P9_16  51 OUTPUT MODE7 - RD  */
+				0x078 0x7F  /* P9_12  60 OUTPUT MODE7 - RS  */
 					
 				/* OUTPUT  GPIO(mode7) 0x07 pulldown, 0x17 pullup, 0x?f no pullup/down */
 				/* INPUT   GPIO(mode7) 0x27 pulldown, 0x37 pullup, 0x?f no pullup/down */
