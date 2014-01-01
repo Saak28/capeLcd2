@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "lcd2.h"
 #include "SimpleGPIO.h"
+#include "ILI9341.h"
 using namespace std;
 
 unsigned int GPIO_D0=32;
@@ -24,7 +25,12 @@ int main(int argc, char *argv[])
 	cout << "Testing the LCD 2.4'" << endl;
 
 	InitGpio();
-
+	cout << "Start Sleep" << endl;
+	msleep(1000);
+	cout << "End   Sleep" << endl;
+	
+//	LcdReset();
+	
 	ReleaseGpio();
 	
 	return 0;
