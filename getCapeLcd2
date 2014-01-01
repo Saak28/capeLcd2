@@ -1,3 +1,0 @@
-#!/bin/bash
-
-wget ftp://saak:851068@saak.no-ip.org/BeagleboneFiles/capeLcd2/$1
