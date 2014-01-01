@@ -25,11 +25,9 @@ int main(int argc, char *argv[])
 	cout << "Testing the LCD 2.4'" << endl;
 
 	InitGpio();
-	cout << "Start Sleep" << endl;
-	msleep(1000);
-	cout << "End   Sleep" << endl;
-	
-//	LcdReset();
+	cout << "Init Lcd..." << endl;
+	LcdInit();
+	cout << "Init Lcd done..." << endl;
 	
 	ReleaseGpio();
 	

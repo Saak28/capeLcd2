@@ -4,7 +4,7 @@
 //#include "projectconfig.h"
 //#include "lcd.h"
 
-void              lcdInit(void);
+void              LcdInit(void);
 // void              lcdTest(void);
 // uint16_t          lcdGetPixel(uint16_t x, uint16_t y);
 // void              lcdFillRGB(uint16_t color);
