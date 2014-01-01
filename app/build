@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Building Lcd2 Application"
+
+g++ -O2 -Wall lcd2.cpp -o lcd2
