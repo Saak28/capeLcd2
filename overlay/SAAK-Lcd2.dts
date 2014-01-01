@@ -5,46 +5,64 @@
 * it under the terms of the GNU General Purpose License Version 2 as
 * published by the Free Software Foundation
 *
-* Original from: github.com/jadonk/validation-scripts/blob/master/test-capemgr/ 
+* by Saak Dertadian (s.dertadian@gmail.com)
 *
-* Modified by Derek Molloy for the example on www.derekmolloy.ie
-* that maps GPIO pins for the example
+* Cape LCD 2.4' for Beaglebone
+* usind Color LCD 240x320 (Newhaven: NHD‐2.4‐240320SF)
+*
 */
 
 /dts-v1/;
 /plugin/;
 
 /{
-       compatible = "ti,beaglebone", "ti,beaglebone-black";
-       part-number = "SAAK-Led-Test";
-       version = "00A0";
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+	part-number = "SAAK-Lcd2";
+	version = "00A0";
 
-       fragment@0 {
-             target = <&am33xx_pinmux>;
-            
-             __overlay__ {
-                  pinctrl_test: SAAK_Led_Test_Pins {
-			pinctrl-single,pins = <
+	fragment@0
+	{
+		target = <&am33xx_pinmux>;
+		
+		__overlay__
+		{
+			pinctrl_Lcd2: SAAK_Lcd2_Pins
+			{
+				pinctrl-single,pins = <
 
-				0x078 0x0F  /* P9_12 60 OUTPUT MODE7 - The LED Output */
-				0x040 0x0F  /* P9_15 48 OUTPUT MODE7 - The LED Output */
-				0x044 0x37  /* P9_23 48 OUTPUT MODE7 - The BP  Input  */
-                       
-                               /* OUTPUT  GPIO(mode7) 0x07 pulldown, 0x17 pullup, 0x?f no pullup/down */
-			       /* INPUT   GPIO(mode7) 0x27 pulldown, 0x37 pullup, 0x?f no pullup/down */
+				0x000 0x0F  /* P8_25 32 INPUT  MODE7 - D0 */
+				0x004 0x0F  /* P8_24 33 INPUT  MODE7 - D1 */
+				0x008 0x0F  /* P8_05 34 INPUT  MODE7 - D2 */
+				0x00C 0x0F  /* P8_06 35 INPUT  MODE7 - D3 */
+				0x010 0x0F  /* P8_23 36 INPUT  MODE7 - D4 */
+				0x014 0x0F  /* P8_22 37 INPUT  MODE7 - D5 */
+				0x018 0x0F  /* P8_03 38 INPUT  MODE7 - D6 */
+				0x01C 0x0F  /* P8_04 39 INPUT  MODE7 - D7 */
 
-			>;
-		  };
-             };
-       };
+				0x040 0x7F  /* P9_15 48 OUTPUT MODE7 - CS */
+				0x044 0x7F  /* P9_23 49 OUTPUT MODE7 - DC */
+				0x048 0x7F  /* P9_14 50 OUTPUT MODE7 - WR */
+				0x04C 0x7F  /* P9_16 51 OUTPUT MODE7 - RD */
+				0x078 0x7F  /* P9_12 60 OUTPUT MODE7 - RS */
+					
+				/* OUTPUT  GPIO(mode7) 0x07 pulldown, 0x17 pullup, 0x?f no pullup/down */
+				/* INPUT   GPIO(mode7) 0x27 pulldown, 0x37 pullup, 0x?f no pullup/down */
 
-       fragment@1 {
+				>;
+			};
+		};
+	};
+
+	fragment@1
+	{
 		target = <&ocp>;
-		__overlay__ {
-			test_helper: helper {
+		__overlay__
+		{
+			test_helper: helper
+			{
 				compatible = "bone-pinmux-helper";
 				pinctrl-names = "default";
-				pinctrl-0 = <&pinctrl_test>;
+				pinctrl-0 = <&pinctrl_Lcd2>;
 				status = "okay";
 			};
 		};
