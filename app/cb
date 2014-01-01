@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "Building Lcd2 Application"
+
+arm-linux-gnueabi-g++ -O2 -Wall lcd2.cpp SimpleGPIO.cpp ILI9341.cpp -o lcd2
+

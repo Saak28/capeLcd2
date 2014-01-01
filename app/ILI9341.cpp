@@ -2,9 +2,7 @@
 
 void LcdInit()
 {
-  delay(120);
-
-  LcdReset();
+	LcdReset();
 }
 
 void LcdReset()

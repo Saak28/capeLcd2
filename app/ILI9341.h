@@ -5,6 +5,7 @@
 //#include "lcd.h"
 
 void              LcdInit(void);
+void              LcdReset(void);
 // void              lcdTest(void);
 // uint16_t          lcdGetPixel(uint16_t x, uint16_t y);
 // void              lcdFillRGB(uint16_t color);
@@ -19,7 +20,6 @@ void              LcdInit(void);
 // uint16_t          lcdGetControllerID(void);
 // lcdOrientation_t  lcdGetOrientation(void);
 // lcdProperties_t   lcdGetProperties(void);
-// void              lcdReset(void);
 // void              lcdWriteCommand(unsigned char command);
 // void              lcdWriteData(unsigned short data);
 // void              lcdWrite(unsigned short data);
