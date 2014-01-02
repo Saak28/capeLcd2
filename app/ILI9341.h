@@ -1,11 +1,37 @@
 #ifndef __ILI9341_H__
-  #define __ILI9341_H__
+#define __ILI9341_H__
 
-//#include "projectconfig.h"
-//#include "lcd.h"
+typedef enum 
+{
+	LCD_ORIENTATION_PORTRAIT=0,
+	LCD_ORIENTATION_LANDSCAPE=1
+} lcdOrientation_t;
+
+// This struct is used to indicate the capabilities of different LCDs
+typedef struct
+{
+	unsigned int width;         // LCD width in pixels (default orientation)
+	unsigned int height;        // LCD height in pixels (default orientation)
+	bool touchscreen;   // Whether the LCD has a touch screen
+	bool orientation;   // Whether the LCD orientation can be modified
+	bool hwscrolling;   // Whether the LCD support HW scrolling
+} lcdProperties_t;
 
 void              LcdInit(void);
 void              LcdReset(void);
+unsigned char     LcdBuildMemoryAccessControlConfig(
+										bool rowAddressOrder,
+										bool columnAddressOrder,
+										bool rowColumnExchange,
+										bool verticalRefreshOrder,
+										bool colorOrder,
+										bool horizontalRefreshOrder);
+void              LcdWriteCommand(unsigned char command);
+void              LcdWriteData(unsigned short data);
+void              LcdWrite(unsigned short data);
+void					GPIO_Write(unsigned int data);
+void					LcdTest(void);
+
 // void              lcdTest(void);
 // uint16_t          lcdGetPixel(uint16_t x, uint16_t y);
 // void              lcdFillRGB(uint16_t color);
@@ -20,19 +46,24 @@ void              LcdReset(void);
 // uint16_t          lcdGetControllerID(void);
 // lcdOrientation_t  lcdGetOrientation(void);
 // lcdProperties_t   lcdGetProperties(void);
-// void              lcdWriteCommand(unsigned char command);
-// void              lcdWriteData(unsigned short data);
-// void              lcdWrite(unsigned short data);
 // void              lcdSetCursor(unsigned short x, unsigned short y);
 // void              lcdSetWindow(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1);
 // void              lcdHome(void);
-// unsigned char     lcdBuildMemoryAccessControlConfig(
-//                                 bool rowAddressOrder,
-//                                 bool columnAddressOrder,
-//                                 bool rowColumnExchange,
-//                                 bool verticalRefreshOrder,
-//                                 bool colorOrder,
-//                                 bool horizontalRefreshOrder);
 // 
 // void              lcdSetWindow(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1);
+
+extern unsigned int GPIO_D0;
+extern unsigned int GPIO_D1;
+extern unsigned int GPIO_D2;
+extern unsigned int GPIO_D3;
+extern unsigned int GPIO_D4;
+extern unsigned int GPIO_D5;
+extern unsigned int GPIO_D6;
+extern unsigned int GPIO_D7;
+extern unsigned int GPIO_CS;
+extern unsigned int GPIO_DC;
+extern unsigned int GPIO_WR;
+extern unsigned int GPIO_RD;
+extern unsigned int GPIO_RS;
+
 #endif

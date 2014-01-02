@@ -6,20 +6,6 @@
 #include "ILI9341.h"
 using namespace std;
 
-unsigned int GPIO_D0=32;
-unsigned int GPIO_D1=33;
-unsigned int GPIO_D2=34;
-unsigned int GPIO_D3=35;
-unsigned int GPIO_D4=36;
-unsigned int GPIO_D5=37;
-unsigned int GPIO_D6=38;
-unsigned int GPIO_D7=39;
-unsigned int GPIO_CS=48;
-unsigned int GPIO_DC=49;
-unsigned int GPIO_WR=50;
-unsigned int GPIO_RD=51;
-unsigned int GPIO_RS=78;
-
 int main(int argc, char *argv[])
 {
 	cout << "Testing the LCD 2.4'" << endl;
@@ -27,6 +13,9 @@ int main(int argc, char *argv[])
 	InitGpio();
 	cout << "Init Lcd..." << endl;
 	LcdInit();
+	LcdTest();
+	cout << "Init Lcd done..." << endl;
+	usleep(2000000);
 	cout << "Init Lcd done..." << endl;
 	
 	ReleaseGpio();
