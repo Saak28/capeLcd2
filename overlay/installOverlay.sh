@@ -7,6 +7,6 @@ CURRENT_DIR=$(pwd)
 
 cd /lib/firmware
 echo Install Overlay...
-echo SAAK-Lcd2 > $SLOTS
+echo SAAK-Lcd24 > $SLOTS
 
 #cd $CURRENT_DIR

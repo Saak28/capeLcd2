@@ -17,7 +17,7 @@
 
 /{
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
-	part-number = "SAAK-Lcd2";
+	part-number = "SAAK-Lcd24";
 	version = "00A0";
 
 	fragment@0
@@ -26,18 +26,18 @@
 		
 		__overlay__
 		{
-			pinctrl_Lcd2: SAAK_Lcd2_Pins
+			pinctrl_Lcd24: SAAK_Lcd24_Pins
 			{
 				pinctrl-single,pins = <
 
-				0x000 0x0F  /* P8_25 32 INPUT  MODE7 - D0 */
-				0x004 0x0F  /* P8_24 33 INPUT  MODE7 - D1 */
-				0x008 0x0F  /* P8_05 34 INPUT  MODE7 - D2 */
-				0x00C 0x0F  /* P8_06 35 INPUT  MODE7 - D3 */
-				0x010 0x0F  /* P8_23 36 INPUT  MODE7 - D4 */
-				0x014 0x0F  /* P8_22 37 INPUT  MODE7 - D5 */
-				0x018 0x0F  /* P8_03 38 INPUT  MODE7 - D6 */
-				0x01C 0x0F  /* P8_04 39 INPUT  MODE7 - D7 */
+				0x090 0x0F  /* P8_07 66 INPUT  MODE7 - D0 */
+				0x094 0x0F  /* P8_08 67 INPUT  MODE7 - D1 */
+				0x09C 0x0F  /* P8_09 69 INPUT  MODE7 - D2 */
+				0x098 0x0F  /* P8_10 68 INPUT  MODE7 - D3 */
+				0x034 0x0F  /* P8_11 45 INPUT  MODE7 - D4 */
+				0x030 0x0F  /* P8_12 44 INPUT  MODE7 - D5 */
+				0x024 0x0F  /* P8_13 23 INPUT  MODE7 - D6 */
+				0x028 0x0F  /* P8_14 26 INPUT  MODE7 - D7 */
 
 				0x040 0x7F  /* P9_15 48 OUTPUT MODE7 - CS */
 				0x044 0x7F  /* P9_23 49 OUTPUT MODE7 - DC */
@@ -62,7 +62,7 @@
 			{
 				compatible = "bone-pinmux-helper";
 				pinctrl-names = "default";
-				pinctrl-0 = <&pinctrl_Lcd2>;
+				pinctrl-0 = <&pinctrl_Lcd24>;
 				status = "okay";
 			};
 		};
