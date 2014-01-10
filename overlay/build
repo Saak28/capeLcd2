@@ -2,5 +2,5 @@
 
 echo "Compiling the overlay from .dts to .dtbo"
 
-dtc -O dtb -o SAAK-Lcd24-00A0.dtbo -b 0 -@ SAAK-Lcd24.dts
-cp -f SAAK-Lcd24-00A0.dtbo /lib/firmware
+dtc -O dtb -o BB-LCD24-00A0.dtbo -b 0 -@ BB-LCD24-00A0.dts
+cp -f BB-LCD24-00A0.dtbo /lib/firmware

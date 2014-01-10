@@ -17,8 +17,25 @@
 
 /{
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
-	part-number = "SAAK-Lcd24";
+	part-number = "BB-LCD24";
 	version = "00A0";
+
+	exclusive-use =
+		/* the pin header uses */
+		"P8.07",	/* GPIO_D0 */
+		"P8.08",	/* GPIO_D1 */
+		"P8.09",	/* GPIO_D2 */
+		"P8.10",	/* GPIO_D3 */
+		"P8.11",	/* GPIO_D4 */
+		"P8.12",	/* GPIO_D5 */
+		"P8.13",	/* GPIO_D6 */
+		"P8.14",	/* GPIO_D7 */
+
+		"P9.15",	/* GPIO_CS */
+		"P9.23",	/* GPIO_DC */
+		"P9.14",	/* GPIO_WR */
+		"P9.16",	/* GPIO_RD */
+		"P9.12";	/* GPIO_RS */
 
 	fragment@0
 	{
@@ -26,7 +43,7 @@
 		
 		__overlay__
 		{
-			pinctrl_Lcd24: SAAK_Lcd24_Pins
+			pinctrl_LCD24: BB_LCD24_Pins
 			{
 				pinctrl-single,pins = <
 
@@ -38,15 +55,6 @@
 				0x030 0x37  /* P8_12  44 INPUT  MODE7 - D5  */
 				0x024 0x37  /* P8_13  23 INPUT  MODE7 - D6  */
 				0x028 0x37  /* P8_14  26 INPUT  MODE7 - D7  */
-
-				0x03C 0x37  /* P8_15  47 INPUT  MODE7 - D8  */
-				0x038 0x37  /* P8_16  46 INPUT  MODE7 - D9  */
-				0x02C 0x37  /* P8_17  27 INPUT  MODE7 - D10 */
-				0x08C 0x37  /* P8_18  65 INPUT  MODE7 - D11 */
-				0x020 0x37  /* P8_19  22 INPUT  MODE7 - D12 */
-				0x07C 0x37  /* P8_26  61 INPUT  MODE7 - D13 */
-				0x070 0x37  /* P9_11  30 INPUT  MODE7 - D14 */
-				0x1A4 0x37  /* P9_27 115 INPUT  MODE7 - D15 */
 
 				0x040 0x7F  /* P9_15  48 OUTPUT MODE7 - CS  */
 				0x044 0x7F  /* P9_23  49 OUTPUT MODE7 - DC  */
@@ -71,7 +79,7 @@
 			{
 				compatible = "bone-pinmux-helper";
 				pinctrl-names = "default";
-				pinctrl-0 = <&pinctrl_Lcd24>;
+				pinctrl-0 = <&pinctrl_LCD24>;
 				status = "okay";
 			};
 		};
