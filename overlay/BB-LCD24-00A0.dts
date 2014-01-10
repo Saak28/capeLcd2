@@ -75,12 +75,26 @@
 		target = <&ocp>;
 		__overlay__
 		{
-			test_helper: helper
+			lcd24@0
 			{
 				compatible = "bone-pinmux-helper";
 				pinctrl-names = "default";
 				pinctrl-0 = <&pinctrl_LCD24>;
 				status = "okay";
+
+				lcd-d0 = <&gpio3 2 0>;
+				lcd-d1 = <&gpio3 3 0>;
+				lcd-d2 = <&gpio3 5 0>;
+				lcd-d3 = <&gpio3 4 0>;
+				lcd-d4 = <&gpio2 13 0>;
+				lcd-d5 = <&gpio2 12 0>;
+				lcd-d6 = <&gpio1 23 0>;
+				lcd-d7 = <&gpio1 26 0>;
+				lcd-cs = <&gpio2 16 0>;
+				lcd-dc = <&gpio2 17 0>;
+				lcd-wr = <&gpio2 18 0>;
+				lcd-rd = <&gpio2 19 0>;
+				lcd-rs = <&gpio2 28 0>;
 			};
 		};
 	};
