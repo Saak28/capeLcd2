@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <iostream>
 #include <unistd.h>
 #include "ILI9341.h"
@@ -45,14 +46,14 @@ enum
 	MemoryAccessControlColorOrderRGB
 } MemoryAccessControlColorOrder;
 
-enum
-{
-	ColumnAddressSet = 0x2a,
-	PageAddressSet = 0x2b,
-	MemoryWrite = 0x2c,
-	MemoryAccessControl = 0x36,
-	WriteDisplayBrightness = 0x51
-} ILI9341Register;
+//enum
+//{
+//	ColumnAddressSet = 0x2a,
+//	PageAddressSet = 0x2b,
+//	MemoryWrite = 0x2c,
+//	MemoryAccessControl = 0x36,
+//	WriteDisplayBrightness = 0x51
+//} ILI9341Register;
 
 static lcdProperties_t lcdProperties = {240,320,true,true,true};
 static lcdOrientation_t lcdOrientation=LCD_ORIENTATION_PORTRAIT;
@@ -79,89 +80,88 @@ void LcdInit()
 		MemoryAccessControlReverseOrder); // horizontalRefreshOrder
 
 	LcdReset();
-// 	gpio_set_value(GPIO_CS,LOW);
 
-	LcdWriteCommand(0x28);	// Display Off
+	LcdWriteCommand(CMD_DISPLAY_OFF);					// Display Off
 	
-	LcdWriteCommand(0x11);	//exit SLEEP mode
+	LcdWriteCommand(CMD_SLEEP_OUT);						// exit SLEEP mode
 	LcdWriteData(0x0000);
 
 
-	LcdWriteCommand(0xCB);	//Power Control A
-	LcdWriteData(0x39);		//always 0x39
-	LcdWriteData(0x2C);		//always 0x2C
-	LcdWriteData(0x00);		//always 0x00
-	LcdWriteData(0x34);		//Vcore = 1.6V
-	LcdWriteData(0x02);		//DDVDH = 5.6V
+	LcdWriteCommand(CMD_POWER_CONTROL_A);				// Power Control A
+	LcdWriteData(0x39);									// always 0x39
+	LcdWriteData(0x2C);									// always 0x2C
+	LcdWriteData(0x00);									// always 0x00
+	LcdWriteData(0x34);									// Vcore = 1.6V
+	LcdWriteData(0x02);									// DDVDH = 5.6V
 
-	LcdWriteCommand(0xCF);	//Power Control B
-	LcdWriteData(0x00);		//always 0x00
-	LcdWriteData(0x81);		//PCEQ off
-	LcdWriteData(0x30);		//ESD protection
+	LcdWriteCommand(CMD_POWER_CONTROL_B);				// Power Control B
+	LcdWriteData(0x00);									// always 0x00
+	LcdWriteData(0x81);									// PCEQ off
+	LcdWriteData(0x30);									// ESD protection
 
-	LcdWriteCommand(0xE8);	//Driver timing control A
-	LcdWriteData(0x85);		//non‐overlap
-	LcdWriteData(0x01);		//EQ timing
-	LcdWriteData(0x79);		//Pre‐charge timing
+	LcdWriteCommand(CMD_DRIVER_TIMING_CONTROL_A);		// Driver timing control A
+	LcdWriteData(0x85);									// non‐overlap
+	LcdWriteData(0x01);									// EQ timing
+	LcdWriteData(0x79);									// Pre‐charge timing
 
-	LcdWriteCommand(0xEA);	//Driver timing control B
-	LcdWriteData(0x00);		//Gate driver timing
-	LcdWriteData(0x00);		//always 0x00
+	LcdWriteCommand(CMD_DRIVER_TIMING_CONTROL_B);		// Driver timing control B
+	LcdWriteData(0x00);									// Gate driver timing
+	LcdWriteData(0x00);									// always 0x00
 
-	LcdWriteCommand(0xED);	//Power‐On sequence control
-	LcdWriteData(0x64);		//soft start
-	LcdWriteData(0x03);		//power on sequence
-	LcdWriteData(0x12);		//power on sequence
-	LcdWriteData(0x81);		//DDVDH enhance on
+	LcdWriteCommand(CMD_POWER_ON_SEQUENCE_CONTROL);		// Power‐On sequence control
+	LcdWriteData(0x64);									// soft start
+	LcdWriteData(0x03);									// power on sequence
+	LcdWriteData(0x12);									// power on sequence
+	LcdWriteData(0x81);									// DDVDH enhance on
 
-	LcdWriteCommand(0xF7);	//DDVDH enhance on
-	LcdWriteData(0x20);		//DDVDH=2xVCI
+	LcdWriteCommand(CMD_PUMP_RATION_CONTROL);			// DDVDH enhance on
+	LcdWriteData(0x20);									// DDVDH=2xVCI
 	
-	LcdWriteCommand(0xC0);	//power control 1
+	LcdWriteCommand(CMD_POWER_CONTROL_1);				// power control 1
 	LcdWriteData(0x26);
-	LcdWriteData(0x04);		//second parameter for ILI9340 (ignored by ILI9341)
+	LcdWriteData(0x04);									// second parameter for ILI9340 (ignored by ILI9341)
 
-	LcdWriteCommand(0xC1);	//power control 2
+	LcdWriteCommand(CMD_POWER_CONTROL_2);				// power control 2
 	LcdWriteData(0x11);
 
-	LcdWriteCommand(0xC5);	//VCOM control 1
+	LcdWriteCommand(CMD_VCOM_CONTROL_1);				// VCOM control 1
 	LcdWriteData(0x35);
 	LcdWriteData(0x3E);
 
-	LcdWriteCommand(0xC7);	//VCOM control 2
+	LcdWriteCommand(CMD_VCOM_CONTROL_2);				// VCOM control 2
 	LcdWriteData(0xBE);
 
-	LcdWriteCommand(0x36);//memory access control = BGR
+	LcdWriteCommand(CMD_MEMORY_ACCESS_CONTROL);			// memory access control = BGR
 	LcdWriteData(0x88);
 
-	LcdWriteCommand(0xB1);	//frame rate control
+	LcdWriteCommand(CMD_FRAME_CONTROL_NORMAL_MODE);		// frame rate control
 	LcdWriteData(0x00);
 	LcdWriteData(0x10);
 
-	LcdWriteCommand(0xB6);	//display function control
+	LcdWriteCommand(CMD_DISPLAY_FUNCTION_CONTROL);		// display function control
 	LcdWriteData(0x0A);
 	LcdWriteData(0xA2);
 
-	LcdWriteCommand(0x3A);	//pixel format = 16 bit per pixel
+	LcdWriteCommand(CMD_PIXEL_FORMAT_SET);				// pixel format = 16 bit per pixel
 	LcdWriteData(0x55);
 
-	LcdWriteCommand(0xF2);	//3G Gamma control
-	LcdWriteData(0x02);		//off
+	LcdWriteCommand(CMD_ENABLE_3G);						// 3G Gamma control
+	LcdWriteData(0x02);									// OFF
 
-	LcdWriteCommand(0x26);	//Gamma curve 3
+	LcdWriteCommand(CMD_GAMMA_SET);						// Gamma curve 3
 	LcdWriteData(0x01);
 
-	LcdWriteCommand(0x2A);	//column address set
+	LcdWriteCommand(CMD_COLUMN_ADDRESS_SET);			// column address set
 	LcdWriteData(0x00);
-	LcdWriteData(0x00);		//start 0x0000
+	LcdWriteData(0x00);									// start 0x0000
 	LcdWriteData(0x00);
-	LcdWriteData(0xEF);		//end 0x00EF
+	LcdWriteData(0xEF);									// end 0x00EF
 
-	LcdWriteCommand(0x2B);	//page address set
+	LcdWriteCommand(CMD_PAGE_ADDRESS_SET);				// page address set
 	LcdWriteData(0x00);
-	LcdWriteData(0x00);		//start 0x0000
+	LcdWriteData(0x00);									// start 0x0000
 	LcdWriteData(0x01);
-	LcdWriteData(0x3F);		//end 0x013F
+	LcdWriteData(0x3F);									// end 0x013F
 
 // 	LcdWriteCommand(0xe0);
 // 	LcdWriteData(0x1f);
@@ -200,11 +200,11 @@ void LcdInit()
 // 	LcdWriteCommand(0xb7);
 // 	LcdWriteData(0x07);
 // 
-// 	LcdWriteCommand(0x11);
-// 	usleep(100000);
-// 	LcdWriteCommand(0x29);
-// 	usleep(100000);
-// 	LcdWriteCommand(MemoryWrite);
+	LcdWriteCommand(CMD_SLEEP_OUT);
+	usleep(100000);
+	LcdWriteCommand(CMD_DISPLAY_ON);
+	usleep(100000);
+	LcdWriteCommand(CMD_MEMORY_WRITE);
 }
 
 void LcdReset()
@@ -214,7 +214,7 @@ void LcdReset()
 	gpio_set_value(GPIO_CS,HIGH);
 
 	gpio_set_value(GPIO_RS,LOW);
-	usleep(120000);
+	usleep(1000);
 	gpio_set_value(GPIO_RS,HIGH);
 	usleep(120000);
 }
@@ -239,211 +239,82 @@ unsigned char LcdBuildMemoryAccessControlConfig(
 }
 
 // Write an 8 bit command to the IC driver
-void LcdWriteCommand(unsigned char command)
+void LcdWriteCommand(u8 command)
 {
 	gpio_set_value(GPIO_DC,LOW);
 	LcdWrite(command);
 }
 
-// Write an 16 bit data word to the IC driver
-void LcdWriteData(unsigned short data)
+// Write an 8 bit data word to the IC driver
+void LcdWriteData(u8 data)
 {
 	gpio_set_value(GPIO_DC,HIGH);
 	LcdWrite(data);
 }
 
+// Write an 16 bit data word to the IC driver
+void LcdWriteData16(u16 data)
+{
+	gpio_set_value(GPIO_DC,HIGH);
+	LcdWrite(data>>8);
+	LcdWrite(data&0xFF);
+}
+
 // Places a 16 bit word on the port connected to the IC driver and pulses the write pin
 void LcdWrite(unsigned short data)
 {
-//	gpio_set_value(GPIO_WR,HIGH);
-
 	// Write bit 0-13 (low 13 bits) to the data port
 	gpio_set_value(GPIO_CS,LOW);
-// 	GPIO_Write(data);
-	if(data&0x0100)	gpio_set_value(GPIO_D0,HIGH);
-	else					gpio_set_value(GPIO_D0,LOW);
-
-	if(data&0x0200)	gpio_set_value(GPIO_D1,HIGH);
-	else					gpio_set_value(GPIO_D1,LOW);
-
-	if(data&0x0400)	gpio_set_value(GPIO_D2,HIGH);
-	else					gpio_set_value(GPIO_D2,LOW);
-
-	if(data&0x0800)	gpio_set_value(GPIO_D3,HIGH);
-	else					gpio_set_value(GPIO_D3,LOW);
-
-	if(data&0x1000)	gpio_set_value(GPIO_D4,HIGH);
-	else					gpio_set_value(GPIO_D4,LOW);
-
-	if(data&0x2000)	gpio_set_value(GPIO_D5,HIGH);
-	else					gpio_set_value(GPIO_D5,LOW);
-
-	if(data&0x4000)	gpio_set_value(GPIO_D6,HIGH);
-	else					gpio_set_value(GPIO_D6,LOW);
-
-	if(data&0x8000)	gpio_set_value(GPIO_D7,HIGH);
-	else					gpio_set_value(GPIO_D7,LOW);
-
-  // Strobe the WRITE pin
-	gpio_set_value(GPIO_WR,LOW);
-	gpio_set_value(GPIO_WR,HIGH);
 
 	if(data&0x0001)	gpio_set_value(GPIO_D0,HIGH);
-	else					gpio_set_value(GPIO_D0,LOW);
+	else			gpio_set_value(GPIO_D0,LOW);
 
 	if(data&0x0002)	gpio_set_value(GPIO_D1,HIGH);
-	else					gpio_set_value(GPIO_D1,LOW);
+	else			gpio_set_value(GPIO_D1,LOW);
 
 	if(data&0x0004)	gpio_set_value(GPIO_D2,HIGH);
-	else					gpio_set_value(GPIO_D2,LOW);
+	else			gpio_set_value(GPIO_D2,LOW);
 
 	if(data&0x0008)	gpio_set_value(GPIO_D3,HIGH);
-	else					gpio_set_value(GPIO_D3,LOW);
+	else			gpio_set_value(GPIO_D3,LOW);
 
 	if(data&0x0010)	gpio_set_value(GPIO_D4,HIGH);
-	else					gpio_set_value(GPIO_D4,LOW);
+	else			gpio_set_value(GPIO_D4,LOW);
 
 	if(data&0x0020)	gpio_set_value(GPIO_D5,HIGH);
-	else					gpio_set_value(GPIO_D5,LOW);
+	else			gpio_set_value(GPIO_D5,LOW);
 
 	if(data&0x0040)	gpio_set_value(GPIO_D6,HIGH);
-	else					gpio_set_value(GPIO_D6,LOW);
+	else			gpio_set_value(GPIO_D6,LOW);
 
 	if(data&0x0080)	gpio_set_value(GPIO_D7,HIGH);
-	else					gpio_set_value(GPIO_D7,LOW);
+	else			gpio_set_value(GPIO_D7,LOW);
 
-  // Strobe the WRITE pin
 	gpio_set_value(GPIO_WR,LOW);
 	gpio_set_value(GPIO_WR,HIGH);
-	
-	gpio_set_value(GPIO_CS,HIGH);
-}
 
-void GPIO_Write(unsigned int data)
-{
-// 	if(data&0x0001)	gpio_set_value(GPIO_D0,HIGH);
-// 	else					gpio_set_value(GPIO_D0,LOW);
-// 
-// 	if(data&0x0002)	gpio_set_value(GPIO_D1,HIGH);
-// 	else					gpio_set_value(GPIO_D1,LOW);
-// 
-// 	if(data&0x0004)	gpio_set_value(GPIO_D2,HIGH);
-// 	else					gpio_set_value(GPIO_D2,LOW);
-// 
-// 	if(data&0x0008)	gpio_set_value(GPIO_D3,HIGH);
-// 	else					gpio_set_value(GPIO_D3,LOW);
-// 
-// 	if(data&0x0010)	gpio_set_value(GPIO_D4,HIGH);
-// 	else					gpio_set_value(GPIO_D4,LOW);
-// 
-// 	if(data&0x0020)	gpio_set_value(GPIO_D5,HIGH);
-// 	else					gpio_set_value(GPIO_D5,LOW);
-// 
-// 	if(data&0x0040)	gpio_set_value(GPIO_D6,HIGH);
-// 	else					gpio_set_value(GPIO_D6,LOW);
-// 
-// 	if(data&0x0080)	gpio_set_value(GPIO_D7,HIGH);
-// 	else					gpio_set_value(GPIO_D7,LOW);
-// 
-// 	if(data&0x0100)	gpio_set_value(GPIO_D8,HIGH);
-// 	else					gpio_set_value(GPIO_D8,LOW);
-// 
-// 	if(data&0x0200)	gpio_set_value(GPIO_D9,HIGH);
-// 	else					gpio_set_value(GPIO_D9,LOW);
-// 
-// 	if(data&0x0400)	gpio_set_value(GPIO_D10,HIGH);
-// 	else					gpio_set_value(GPIO_D10,LOW);
-// 
-// 	if(data&0x0800)	gpio_set_value(GPIO_D11,HIGH);
-// 	else					gpio_set_value(GPIO_D11,LOW);
-// 
-// 	if(data&0x1000)	gpio_set_value(GPIO_D12,HIGH);
-// 	else					gpio_set_value(GPIO_D12,LOW);
-// 
-// 	if(data&0x2000)	gpio_set_value(GPIO_D13,HIGH);
-// 	else					gpio_set_value(GPIO_D13,LOW);
-// 
-// 	if(data&0x4000)	gpio_set_value(GPIO_D14,HIGH);
-// 	else					gpio_set_value(GPIO_D14,LOW);
-// 
-// 	if(data&0x8000)	gpio_set_value(GPIO_D15,HIGH);
-// 	else					gpio_set_value(GPIO_D15,LOW);
-	
-// 	if(data&0x0001)	gpio_set_value(GPIO_D8,HIGH);
-// 	else					gpio_set_value(GPIO_D8,LOW);
-// 
-// 	if(data&0x0002)	gpio_set_value(GPIO_D9,HIGH);
-// 	else					gpio_set_value(GPIO_D9,LOW);
-// 
-// 	if(data&0x0004)	gpio_set_value(GPIO_D10,HIGH);
-// 	else					gpio_set_value(GPIO_D10,LOW);
-// 
-// 	if(data&0x0008)	gpio_set_value(GPIO_D11,HIGH);
-// 	else					gpio_set_value(GPIO_D11,LOW);
-// 
-// 	if(data&0x0010)	gpio_set_value(GPIO_D12,HIGH);
-// 	else					gpio_set_value(GPIO_D12,LOW);
-// 
-// 	if(data&0x0020)	gpio_set_value(GPIO_D13,HIGH);
-// 	else					gpio_set_value(GPIO_D13,LOW);
-// 
-// 	if(data&0x0040)	gpio_set_value(GPIO_D14,HIGH);
-// 	else					gpio_set_value(GPIO_D14,LOW);
-// 
-// 	if(data&0x0080)	gpio_set_value(GPIO_D15,HIGH);
-// 	else					gpio_set_value(GPIO_D15,LOW);
-// 
-// 	if(data&0x0100)	gpio_set_value(GPIO_D0,HIGH);
-// 	else					gpio_set_value(GPIO_D0,LOW);
-// 
-// 	if(data&0x0200)	gpio_set_value(GPIO_D1,HIGH);
-// 	else					gpio_set_value(GPIO_D1,LOW);
-// 
-// 	if(data&0x0400)	gpio_set_value(GPIO_D2,HIGH);
-// 	else					gpio_set_value(GPIO_D2,LOW);
-// 
-// 	if(data&0x0800)	gpio_set_value(GPIO_D3,HIGH);
-// 	else					gpio_set_value(GPIO_D3,LOW);
-// 
-// 	if(data&0x1000)	gpio_set_value(GPIO_D4,HIGH);
-// 	else					gpio_set_value(GPIO_D4,LOW);
-// 
-// 	if(data&0x2000)	gpio_set_value(GPIO_D5,HIGH);
-// 	else					gpio_set_value(GPIO_D5,LOW);
-// 
-// 	if(data&0x4000)	gpio_set_value(GPIO_D6,HIGH);
-// 	else					gpio_set_value(GPIO_D6,LOW);
-// 
-// 	if(data&0x8000)	gpio_set_value(GPIO_D7,HIGH);
-// 	else					gpio_set_value(GPIO_D7,LOW);
+	gpio_set_value(GPIO_CS,HIGH);
 }
 
 unsigned int GPIO_Read()
 {
 	unsigned int data=0;
 	unsigned int val;
-	
+
+	gpio_set_dir(GPIO_D0,INPUT_PIN);
+	gpio_set_dir(GPIO_D1,INPUT_PIN);
+	gpio_set_dir(GPIO_D2,INPUT_PIN);
+	gpio_set_dir(GPIO_D3,INPUT_PIN);
+	gpio_set_dir(GPIO_D4,INPUT_PIN);
+	gpio_set_dir(GPIO_D5,INPUT_PIN);
+	gpio_set_dir(GPIO_D6,INPUT_PIN);
+	gpio_set_dir(GPIO_D7,INPUT_PIN);
+
 	gpio_set_value(GPIO_DC,HIGH);
 	gpio_set_value(GPIO_CS,LOW);
 	gpio_set_value(GPIO_RD,LOW);
 	
-// 	gpio_get_value(GPIO_D0,&val);		if(val)	data|=0x0001;
-// 	gpio_get_value(GPIO_D1,&val);		if(val)	data|=0x0002;
-// 	gpio_get_value(GPIO_D2,&val);		if(val)	data|=0x0004;
-// 	gpio_get_value(GPIO_D3,&val);		if(val)	data|=0x0008;
-// 	gpio_get_value(GPIO_D4,&val);		if(val)	data|=0x0010;
-// 	gpio_get_value(GPIO_D5,&val);		if(val)	data|=0x0020;
-// 	gpio_get_value(GPIO_D6,&val);		if(val)	data|=0x0040;
-// 	gpio_get_value(GPIO_D7,&val);		if(val)	data|=0x0080;
-// 	gpio_get_value(GPIO_D8,&val);		if(val)	data|=0x0100;
-// 	gpio_get_value(GPIO_D9,&val);		if(val)	data|=0x0200;
-// 	gpio_get_value(GPIO_D10,&val);	if(val)	data|=0x0400;
-// 	gpio_get_value(GPIO_D11,&val);	if(val)	data|=0x0800;
-// 	gpio_get_value(GPIO_D12,&val);	if(val)	data|=0x1000;
-// 	gpio_get_value(GPIO_D13,&val);	if(val)	data|=0x2000;
-// 	gpio_get_value(GPIO_D14,&val);	if(val)	data|=0x4000;
-// 	gpio_get_value(GPIO_D15,&val);	if(val)	data|=0x8000;
-
+	gpio_set_value(GPIO_RD,LOW);
 	gpio_get_value(GPIO_D0,&val);	if(val)	data|=0x01;
 	gpio_get_value(GPIO_D1,&val);	if(val)	data|=0x02;
 	gpio_get_value(GPIO_D2,&val);	if(val)	data|=0x04;
@@ -452,17 +323,26 @@ unsigned int GPIO_Read()
 	gpio_get_value(GPIO_D5,&val);	if(val)	data|=0x20;
 	gpio_get_value(GPIO_D6,&val);	if(val)	data|=0x40;
 	gpio_get_value(GPIO_D7,&val);	if(val)	data|=0x80;
-	
 	gpio_set_value(GPIO_RD,HIGH);
+
 	gpio_set_value(GPIO_CS,HIGH);
-	
+
+	gpio_set_dir(GPIO_D0,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D1,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D2,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D3,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D4,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D5,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D6,OUTPUT_PIN);
+	gpio_set_dir(GPIO_D7,OUTPUT_PIN);
+
 	return data;
 }
 
 void LcdSetOrientation(lcdOrientation_t value)
 {
 	lcdOrientation = value;
-	LcdWriteCommand(MemoryAccessControl);
+	LcdWriteCommand(CMD_MEMORY_ACCESS_CONTROL);
 	if (lcdOrientation == LCD_ORIENTATION_PORTRAIT)
 	{
 		LcdWriteData(lcdPortraitConfig);
@@ -475,7 +355,7 @@ void LcdSetOrientation(lcdOrientation_t value)
 		lcdProperties.width = 320;
 		lcdProperties.height = 240;
 	}
-	LcdWriteCommand(MemoryWrite);
+	LcdWriteCommand(CMD_MEMORY_WRITE);
 	LcdSetWindow(0, lcdProperties.width-1, 0, lcdProperties.height-1);
 }
 
@@ -496,37 +376,37 @@ unsigned int LcdGetHeight(void)
 
 void LcdSetWindow(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1)
 {
-	LcdWriteCommand(ColumnAddressSet);
+	LcdWriteCommand(CMD_COLUMN_ADDRESS_SET);
 	LcdWriteData((x0 >> 8) & 0xFF);
 	LcdWriteData(x0 & 0xFF);
 	LcdWriteData((y0 >> 8) & 0xFF);
 	LcdWriteData(y0 & 0xFF);
-	LcdWriteCommand(PageAddressSet);
+	LcdWriteCommand(CMD_PAGE_ADDRESS_SET);
 	LcdWriteData((x1 >> 8) & 0xFF);
 	LcdWriteData(x1 & 0xFF);
 	LcdWriteData((y1 >> 8) & 0xFF);
 	LcdWriteData(y1 & 0xFF);
-	LcdWriteCommand(MemoryWrite);
+	LcdWriteCommand(CMD_MEMORY_WRITE);
 }
 
 void LcdTest()
 {
 //	LcdSetOrientation(LCD_ORIENTATION_PORTRAIT);
-	LcdWriteCommand(MemoryWrite);
+	LcdWriteCommand(CMD_MEMORY_WRITE);
 
-	for (int y=0;y<32;y++)
+	for (int y=0;y<320;y++)
 	{
-		for (int x=0;x<24;x++)
+		for (int x=0;x<240;x++)
 		{
-			LcdWriteData(0x03);
-// 			if (y > 279) LcdWriteData(COLOR_WHITE);
-// 			else if (y > 239) LcdWriteData(COLOR_BLUE);
-// 			else if (y > 199) LcdWriteData(COLOR_GREEN);
-// 			else if (y > 159) LcdWriteData(COLOR_CYAN);
-// 			else if (y > 119) LcdWriteData(COLOR_RED);
-// 			else if (y > 79) LcdWriteData(COLOR_MAGENTA);
-// 			else if (y > 39) LcdWriteData(COLOR_YELLOW);
-// 			else LcdWriteData(COLOR_BLACK);
+//			LcdWriteData16(COLOR_RED);
+			if (y > 279) LcdWriteData16(COLOR_WHITE);
+			else if (y > 239) LcdWriteData16(COLOR_BLUE);
+			else if (y > 199) LcdWriteData16(COLOR_GREEN);
+			else if (y > 159) LcdWriteData16(COLOR_CYAN);
+			else if (y > 119) LcdWriteData16(COLOR_RED);
+			else if (y > 79) LcdWriteData16(COLOR_MAGENTA);
+			else if (y > 39) LcdWriteData16(COLOR_YELLOW);
+			else LcdWriteData16(COLOR_BLACK);
 		}
 	}
 }
@@ -536,67 +416,24 @@ unsigned long GetLcdInformation()
 	unsigned long data=0;
 	
 //	LcdWriteCommand(0x01);	// Software Reset
-	usleep(100000);
-	LcdWriteCommand(0x04);	// Read display identification information 
+//	usleep(100000);
+	LcdWriteCommand(0x04);	// Read display identification information
 //	LcdWriteCommand(0x09);	// Read Display Status
-	gpio_set_dir(GPIO_D0,INPUT_PIN);
-	gpio_set_dir(GPIO_D1,INPUT_PIN);
-	gpio_set_dir(GPIO_D2,INPUT_PIN);
-	gpio_set_dir(GPIO_D3,INPUT_PIN);
-	gpio_set_dir(GPIO_D4,INPUT_PIN);
-	gpio_set_dir(GPIO_D5,INPUT_PIN);
-	gpio_set_dir(GPIO_D6,INPUT_PIN);
-	gpio_set_dir(GPIO_D7,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D8,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D9,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D10,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D11,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D12,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D13,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D14,INPUT_PIN);
-// 	gpio_set_dir(GPIO_D15,INPUT_PIN);
-	
-	data|=GPIO_Read();
-	data<<=8;
-	data|=GPIO_Read();
-	data<<=8;
-	data|=GPIO_Read();
-	data<<=8;
-	data|=GPIO_Read();
-	
-	gpio_set_dir(GPIO_D0,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D1,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D2,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D3,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D4,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D5,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D6,OUTPUT_PIN);
-	gpio_set_dir(GPIO_D7,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D8,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D9,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D10,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D11,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D12,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D13,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D14,OUTPUT_PIN);
-// 	gpio_set_dir(GPIO_D15,OUTPUT_PIN);
 
-	gpio_set_value(GPIO_D0,LOW);
-	gpio_set_value(GPIO_D1,LOW);
-	gpio_set_value(GPIO_D2,LOW);
-	gpio_set_value(GPIO_D3,LOW);
-	gpio_set_value(GPIO_D4,LOW);
-	gpio_set_value(GPIO_D5,LOW);
-	gpio_set_value(GPIO_D6,LOW);
-	gpio_set_value(GPIO_D7,LOW);
-// 	gpio_set_value(GPIO_D8,LOW);
-// 	gpio_set_value(GPIO_D9,LOW);
-// 	gpio_set_value(GPIO_D10,LOW);
-// 	gpio_set_value(GPIO_D11,LOW);
-// 	gpio_set_value(GPIO_D12,LOW);
-// 	gpio_set_value(GPIO_D13,LOW);
-// 	gpio_set_value(GPIO_D14,LOW);
-// 	gpio_set_value(GPIO_D15,LOW);
+	data|=GPIO_Read();	data<<=8;
+	data|=GPIO_Read();	data<<=8;
+	data|=GPIO_Read();	data<<=8;
+	data|=GPIO_Read();	data<<=8;
+	data|=GPIO_Read();
+
+//	gpio_set_value(GPIO_D0,LOW);
+//	gpio_set_value(GPIO_D1,LOW);
+//	gpio_set_value(GPIO_D2,LOW);
+//	gpio_set_value(GPIO_D3,LOW);
+//	gpio_set_value(GPIO_D4,LOW);
+//	gpio_set_value(GPIO_D5,LOW);
+//	gpio_set_value(GPIO_D6,LOW);
+//	gpio_set_value(GPIO_D7,LOW);
 	
 	return data;
 }

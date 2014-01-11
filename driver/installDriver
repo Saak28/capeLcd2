@@ -1,0 +1,5 @@
+#!/bin/bash
+echo Install ili9341fb driver...
+
+cp ili9341fb.ko /lib/modules/$(uname -r)/kernel/drivers/
+depmod

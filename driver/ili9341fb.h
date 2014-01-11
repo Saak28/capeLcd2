@@ -1,88 +1,44 @@
-#ifndef __ILI9341_H__
-#define __ILI9341_H__
+/*
+ * linux/include/video/ili9341fb.h -- FB driver for ST7735 LCD controller
+ *
+ * Copyright (C) 2012, Matt Porter
+ *
+ * This file is subject to the terms and conditions of the GNU General Public
+ * License. See the file COPYING in the main directory of this archive for
+ * more details.
+ */
 
-typedef unsigned char			u8;
-typedef unsigned int			u16;
+#define DRVNAME										"ili9341fb"
+#define WIDTH										240
+#define HEIGHT										320
+#define BPP											16
+#define MAX_PALETTE									16
 
-typedef enum 
+/* Supported display modules */
+#define LCD_2_4										0	/* Saak LCD 2.4" */
+
+/* Init script function */
+struct ili9341_function
 {
-	LCD_ORIENTATION_PORTRAIT=0,
-	LCD_ORIENTATION_LANDSCAPE=1
-} lcdOrientation_t;
+	u16 cmd;
+	u16 data;
+};
 
-// This struct is used to indicate the capabilities of different LCDs
-typedef struct
+struct ili9341fb_par
 {
-	unsigned int width;         // LCD width in pixels (default orientation)
-	unsigned int height;        // LCD height in pixels (default orientation)
-	bool touchscreen;   // Whether the LCD has a touch screen
-	bool orientation;   // Whether the LCD orientation can be modified
-	bool hwscrolling;   // Whether the LCD support HW scrolling
-} lcdProperties_t;
+	struct spi_device *spi;
+	struct fb_info *info;
+	struct mutex io_lock;
+	int xoff;
+	int yoff;
+	int rst;
+	int dc;
+	u16 *ssbuf;
+	u8 *buf;
+};
 
-void              LcdInit(void);
-void              LcdReset(void);
-unsigned char     LcdBuildMemoryAccessControlConfig(
-										bool rowAddressOrder,
-										bool columnAddressOrder,
-										bool rowColumnExchange,
-										bool verticalRefreshOrder,
-										bool colorOrder,
-										bool horizontalRefreshOrder);
-void              LcdWriteCommand(unsigned char command);
-void              LcdWriteData(u8 data);
-void              LcdWriteData16(u16 data);
-void              LcdWrite(unsigned short data);
-unsigned int		GPIO_Read(void);
-void					LcdTest(void);
-void					LcdSetOrientation(lcdOrientation_t value);
-lcdOrientation_t	LcdGetOrientation(void);
-unsigned int		LcdGetWidth(void);
-unsigned int		LcdGetHeight(void);
-void					LcdSetWindow(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1);
-unsigned long		GetLcdInformation(void);
-
-// void              lcdTest(void);
-// unsigned int          lcdGetPixel(unsigned int x, unsigned int y);
-// void              lcdFillRGB(unsigned int color);
-// void              lcdDrawPixel(unsigned int x, unsigned int y, unsigned int color);
-// void              lcdDrawPixels(unsigned int x, unsigned int y, unsigned int *data, uint32_t len);
-// void              lcdDrawHLine(unsigned int x0, unsigned int x1, unsigned int y, unsigned int color);
-// void              lcdDrawVLine(unsigned int x, unsigned int y0, unsigned int y1, unsigned int color);
-// void              lcdScroll(int16_t pixels, unsigned int fillColor);
-// unsigned int          lcdGetWidth(void);
-// unsigned int          lcdGetHeight(void);
-// void              lcdSetOrientation(lcdOrientation_t orientation);
-// unsigned int          lcdGetControllerID(void);
-// lcdOrientation_t  lcdGetOrientation(void);
-// lcdProperties_t   lcdGetProperties(void);
-// void              lcdSetCursor(unsigned short x, unsigned short y);
-// void              lcdSetWindow(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1);
-// void              lcdHome(void);
-// 
-// void              lcdSetWindow(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1);
-
-extern unsigned int GPIO_D0;
-extern unsigned int GPIO_D1;
-extern unsigned int GPIO_D2;
-extern unsigned int GPIO_D3;
-extern unsigned int GPIO_D4;
-extern unsigned int GPIO_D5;
-extern unsigned int GPIO_D6;
-extern unsigned int GPIO_D7;
-//extern unsigned int GPIO_D8;
-//extern unsigned int GPIO_D9;
-//extern unsigned int GPIO_D10;
-//extern unsigned int GPIO_D11;
-//extern unsigned int GPIO_D12;
-//extern unsigned int GPIO_D13;
-//extern unsigned int GPIO_D14;
-//extern unsigned int GPIO_D15;
-extern unsigned int GPIO_CS;
-extern unsigned int GPIO_DC;
-extern unsigned int GPIO_WR;
-extern unsigned int GPIO_RD;
-extern unsigned int GPIO_RS;
+int gpio_rst;
+int gpio_dc;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // ILI9341 COMMAND SET
@@ -223,5 +179,3 @@ extern unsigned int GPIO_RS;
 #define COLOR_THEME_DEFAULT_LIGHTER         COLOR_THEME_LIMEGREEN_LIGHTER
 #define COLOR_THEME_DEFAULT_SHADOW          COLOR_THEME_LIMEGREEN_SHADOW
 #define COLOR_THEME_DEFAULT_ACCENT          COLOR_THEME_LIMEGREEN_ACCENT
-
-#endif

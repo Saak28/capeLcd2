@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [[ $(lsmod | grep ili9341) ]]
+then
+        echo Remove Driver
+        rmmod ili9341fb.ko
+fi
+
+rsync -rv --exclude getDriver --exclude oled saak@192.168.1.21:~/beagle/cape/capeLcd24/driver/ ./
+
+if [[ "$@" == "start" ]]
+then
+	insmod ili9341fb.ko
+fi

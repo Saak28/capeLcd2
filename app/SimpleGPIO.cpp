@@ -112,7 +112,9 @@ int gpio_set_dir(unsigned int gpio, PIN_DIRECTION out_flag)
 /****************************************************************
  * gpio_set_value
  ****************************************************************/
-int gpio_se	int fd;
+int gpio_set_value(unsigned int gpio, PIN_VALUE value)
+{
+	int fd;
 	char buf[MAX_BUF];
 
 	snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
@@ -129,8 +131,6 @@ int gpio_se	int fd;
 		write(fd, "1", 2);
 
 	close(fd);
-t_value(unsigned int gpio, PIN_VALUE value)
-{
 	return 0;
 }
 

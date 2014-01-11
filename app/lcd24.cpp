@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include <unistd.h>
-#include "lcd2.h"
+#include "lcd24.h"
 #include "SimpleGPIO.h"
 #include "ILI9341.h"
 using namespace std;
@@ -15,15 +15,23 @@ int main(int argc, char *argv[])
 
 	InitGpio();
 	cout << "Init Lcd..." << endl;
+
 	LcdInit();
-	
+//	LcdReset();
+
+	usleep(10000);
 	sprintf(str,"GetInfo: %08lX",GetLcdInformation());
 	cout << str << endl;
 
 	LcdTest();
+//	LcdWriteCommand(0x20);
+//	usleep(2000000);
+//	LcdWriteCommand(0x21);
+//	usleep(2000000);
+//	LcdWriteCommand(0x20);
 	cout << "Init Lcd done..." << endl;
-	usleep(2000000);
-	cout << "Init Lcd done..." << endl;
+	getchar();
+//	cout << "Init Lcd done..." << endl;
 	
 	ReleaseGpio();
 	
