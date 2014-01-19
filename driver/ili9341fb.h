@@ -13,9 +13,9 @@
 #define HEIGHT										320
 #define BPP											16
 #define MAX_PALETTE									16
-
-/* Supported display modules */
-#define LCD_2_4										0	/* Saak LCD 2.4" */
+#define LCD_BASE_ADDR								0x4830E000
+#define AM33XX_IRQ_LCD								36
+#define LCD_2_4										0	// Supported display modules
 
 /* Init script function */
 struct ili9341_function
@@ -24,21 +24,158 @@ struct ili9341_function
 	u16 data;
 };
 
-struct ili9341fb_par
+typedef struct ili9341fb_par
 {
-	struct spi_device *spi;
+	void __iomem *mmio;
+	struct device *dev;
+	struct resource res;
+	unsigned int lcdc_regs_size;
 	struct fb_info *info;
+	unsigned int pseudo_palette[MAX_PALETTE];
+	struct pinctrl *pinctrl;
+	char *selected_state_name;
+
+	//DMA/Memory things
+	int 				irq;		//irq resource number
+	dma_addr_t			vram_phys;	//should be same as dma_start
+	unsigned long		vram_size;
+	void				*vram_virt;
+	unsigned int		dma_start;	//physical addresses
+	unsigned int		dma_end;
+	int 				blank;		//?
+	int 				suspending;	//whether a suspend is in progress
+
+	//these two are sort-of AM33xx-dependent
+	resource_size_t lcd_regs;		//Base virtual address for LCDC MMIO
+	struct clk *lcdc_clk;			//Power enable for the LCDC
+	struct clk *disp_clk;			//Power enable for the LCDC
+
+	unsigned int lcd_fck_rate;
+	struct notifier_block freq_transition;
+
+
 	struct mutex io_lock;
 	int xoff;
 	int yoff;
-	int rst;
-	int dc;
+
+//	int lcd_d0;
+//	int lcd_d1;
+//	int lcd_d2;
+//	int lcd_d3;
+//	int lcd_d4;
+//	int lcd_d5;
+//	int lcd_d6;
+//	int lcd_d7;
+//	int lcd_cs;
+//	int lcd_dc;
+//	int lcd_wr;
+//	int lcd_rd;
+	int lcd_rs;
+
 	u16 *ssbuf;
 	u8 *buf;
 };
 
-int gpio_rst;
-int gpio_dc;
+static struct resource ili9341_resources[]=
+{
+	[0]=
+	{
+		.start = LCD_BASE_ADDR,				//LCD BASE ADDR
+		.end   = LCD_BASE_ADDR+SZ_4K-1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1]=
+	{
+		.start = AM33XX_IRQ_LCD,			//LCD BASE ADDR
+		.end   = AM33XX_IRQ_LCD,
+		.flags = IORESOURCE_IRQ,
+	}
+};
+
+static struct fb_fix_screeninfo ili9341fb_fix=
+{
+	.id =			"ILI9341",
+	.type =			FB_TYPE_PACKED_PIXELS,
+	.visual =		FB_VISUAL_DIRECTCOLOR,
+	.xpanstep =		0,
+	.ypanstep =		0,
+	.ywrapstep =	0,
+	.line_length =	WIDTH*BPP/8,
+	.accel =		FB_ACCEL_NONE,
+};
+
+static struct fb_var_screeninfo ili9341fb_var=
+{
+	.xres =			WIDTH,
+	.yres =			HEIGHT,
+	.xres_virtual =	WIDTH,
+	.yres_virtual =	HEIGHT,
+	.bits_per_pixel=BPP,
+	.nonstd	=		0,
+};
+
+#define LCD_PID								0x00
+#define LCD_CTRL							0x04
+#define LCD_STAT_REG						0x08
+#define LCD_LIDD_CTRL						0x0C
+#define LCD_CS0_CONF						0x10
+#define LCD_LIDD_CS0_ADDR					0x14
+#define LCD_LIDD_CS0_DATA					0x18
+#define LCD_RASTER_CTRL_REG					0x28
+#define LCD_DMA_CTRL_REG					0x40
+#define LCD_DMA_FRM_BUF_BASE_ADDR_0_REG		0x44
+#define LCD_DMA_FRM_BUF_CEILING_ADDR_0_REG	0x48
+#define LCD_DMA_FRM_BUF_BASE_ADDR_1_REG		0x4C
+#define LCD_DMA_FRM_BUF_CEILING_ADDR_1_REG	0x50
+#define LCD_RAW_STAT_REG					0x58
+#define LCD_MASKED_STAT_REG					0x5c
+#define LCD_INT_ENABLE_SET_REG				0x60
+#define LCD_INT_ENABLE_CLR_REG				0x64
+#define LCD_END_OF_INT_IND_REG				0x68
+#define LCD_CLKC_ENABLE						0x6C
+
+#define LCD_LIDD_TYPE_8080					BIT(0) | BIT(1)
+
+#define LCD_V2_DMA_CLK_EN					BIT(2)
+#define LCD_V2_LIDD_CLK_EN					BIT(1)
+#define LCD_V2_CORE_CLK_EN					BIT(0)
+
+/* LCD Control Register */
+#define LCD_CLK_DIVISOR(x)					((x) << 8)
+#define LCD_RASTER_MODE						0x01
+
+#define  LCD_CLK_ENABLE_REG					0x6c
+#define  LCD_CLK_RESET_REG					0x70
+#define  LCD_CLK_MAIN_RESET					BIT(3)
+
+/* DMA Control Registers */
+#define LCD_DMA_BURST_SIZE(x)				((x) << 4)
+#define LCD_DMA_BURST_1						0x0
+#define LCD_DMA_BURST_2						0x1
+#define LCD_DMA_BURST_4						0x2
+#define LCD_DMA_BURST_8						0x3
+#define LCD_DMA_BURST_16					0x4
+
+#define LCD_V2_END_OF_FRAME0_INT_ENA		BIT(8)
+#define LCD_V2_END_OF_FRAME1_INT_ENA		BIT(9)
+#define LCD_V2_UNDERFLOW_INT_ENA			BIT(5)
+#define LCD_V2_DONE_INT_ENA					BIT(0)
+
+#define LCD_DUAL_FRAME_BUFFER_ENABLE		BIT(0)
+
+/* Interrupt Registers available only in Version 2 */
+#define  LCD_RAW_STAT_REG					0x58
+#define  LCD_MASKED_STAT_REG				0x5c
+#define  LCD_INT_ENABLE_SET_REG				0x60
+#define  LCD_INT_ENABLE_CLR_REG				0x64
+#define  LCD_END_OF_INT_IND_REG				0x68
+
+/* LCD DMA Status Register */
+#define LCD_END_OF_FRAME1					BIT(9)
+#define LCD_END_OF_FRAME0					BIT(8)
+#define LCD_PL_LOAD_DONE					BIT(6)
+#define LCD_FIFO_UNDERFLOW					BIT(5)
+#define LCD_SYNC_LOST						BIT(2)
 
 /////////////////////////////////////////////////////////////////////////////////////
 // ILI9341 COMMAND SET

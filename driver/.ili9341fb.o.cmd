@@ -776,6 +776,20 @@ deps_/home/saak/beagle/cape/capeLcd24/driver/ili9341fb.o := \
   include/linux/of_gpio.h \
   include/linux/pinctrl/consumer.h \
     $(wildcard include/config/pinconf.h) \
+  include/linux/clk.h \
+    $(wildcard include/config/common/clk.h) \
+    $(wildcard include/config/have/clk/prepare.h) \
+    $(wildcard include/config/have/clk.h) \
+  include/linux/of_address.h \
+  include/linux/pm_runtime.h \
+  include/linux/cpufreq.h \
+    $(wildcard include/config/cpu/freq.h) \
+    $(wildcard include/config/cpu/freq/gov/performance.h) \
+    $(wildcard include/config/cpu/freq/default/gov/performance.h) \
+    $(wildcard include/config/cpu/freq/default/gov/powersave.h) \
+    $(wildcard include/config/cpu/freq/default/gov/userspace.h) \
+    $(wildcard include/config/cpu/freq/default/gov/ondemand.h) \
+    $(wildcard include/config/cpu/freq/default/gov/conservative.h) \
   /home/saak/beagle/cape/capeLcd24/driver/ili9341fb.h \
 
 /home/saak/beagle/cape/capeLcd24/driver/ili9341fb.o: $(deps_/home/saak/beagle/cape/capeLcd24/driver/ili9341fb.o)
