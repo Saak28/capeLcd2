@@ -8,7 +8,7 @@
  * more details.
  */
 
-#define DRVNAME										"ili9341fb"
+#define DRIVER_NAME									"ili9341fb"
 #define WIDTH										240
 #define HEIGHT										320
 #define BPP											16
@@ -16,6 +16,7 @@
 #define LCD_BASE_ADDR								0x4830E000
 #define AM33XX_IRQ_LCD								36
 #define LCD_2_4										0	// Supported display modules
+#define LCD_NUM_BUFFERS								1
 
 /* Init script function */
 struct ili9341_function
@@ -76,6 +77,12 @@ typedef struct ili9341fb_par
 	u8 *buf;
 };
 
+
+static int ili9341fb_setcolreg(unsigned regno,unsigned red,unsigned green,unsigned blue,unsigned transp,struct fb_info *info);
+static int fb_ioctl(struct fb_info *info,unsigned int cmd,unsigned long arg);
+static int __init ili9341fb_video_alloc(struct ili9341fb_par *item);
+//static int lcd_cfg_dma(struct ssd1289 *item,int burst_size,int fifo_th);
+
 static struct resource ili9341_resources[]=
 {
 	[0]=
@@ -114,6 +121,17 @@ static struct fb_var_screeninfo ili9341fb_var=
 	.nonstd	=		0,
 };
 
+static struct fb_ops ili9341fb_fbops=
+{
+	.owner			=THIS_MODULE,
+	.fb_setcolreg	=ili9341fb_setcolreg,
+	.fb_fillrect	=cfb_fillrect,
+	.fb_copyarea	=cfb_copyarea,
+	.fb_imageblit	=cfb_imageblit,
+	.fb_ioctl		=fb_ioctl,
+//	.fb_blank = sys_blank,
+};
+
 #define LCD_PID								0x00
 #define LCD_CTRL							0x04
 #define LCD_STAT_REG						0x08
@@ -134,7 +152,10 @@ static struct fb_var_screeninfo ili9341fb_var=
 #define LCD_END_OF_INT_IND_REG				0x68
 #define LCD_CLKC_ENABLE						0x6C
 
+#define LCD_LIDD_RS_EN_POL					BIT(4)
+#define LCD_LIDD_ALE_POL					BIT(3)
 #define LCD_LIDD_TYPE_8080					BIT(0) | BIT(1)
+#define LCD_LIDD_TYPE_SYNC_8080				BIT(1)
 
 #define LCD_V2_DMA_CLK_EN					BIT(2)
 #define LCD_V2_LIDD_CLK_EN					BIT(1)

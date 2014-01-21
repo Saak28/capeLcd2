@@ -790,6 +790,26 @@ deps_/home/saak/beagle/cape/capeLcd24/driver/ili9341fb.o := \
     $(wildcard include/config/cpu/freq/default/gov/userspace.h) \
     $(wildcard include/config/cpu/freq/default/gov/ondemand.h) \
     $(wildcard include/config/cpu/freq/default/gov/conservative.h) \
+  include/linux/dma-mapping.h \
+    $(wildcard include/config/has/dma.h) \
+    $(wildcard include/config/arch/has/dma/set/coherent/mask.h) \
+    $(wildcard include/config/have/dma/attrs.h) \
+    $(wildcard include/config/need/dma/map/state.h) \
+  include/linux/dma-attrs.h \
+  include/linux/dma-direction.h \
+  include/linux/scatterlist.h \
+    $(wildcard include/config/debug/sg.h) \
+  /home/saak/beagle/linux-dev_3.8/KERNEL/arch/arm/include/asm/scatterlist.h \
+    $(wildcard include/config/arm/has/sg/chain.h) \
+  include/asm-generic/scatterlist.h \
+    $(wildcard include/config/need/sg/dma/length.h) \
+  /home/saak/beagle/linux-dev_3.8/KERNEL/arch/arm/include/asm/dma-mapping.h \
+  include/linux/dma-debug.h \
+    $(wildcard include/config/dma/api/debug.h) \
+  include/asm-generic/dma-coherent.h \
+    $(wildcard include/config/have/generic/dma/coherent.h) \
+  include/asm-generic/dma-mapping-common.h \
+  include/linux/kmemcheck.h \
   /home/saak/beagle/cape/capeLcd24/driver/ili9341fb.h \
 
 /home/saak/beagle/cape/capeLcd24/driver/ili9341fb.o: $(deps_/home/saak/beagle/cape/capeLcd24/driver/ili9341fb.o)

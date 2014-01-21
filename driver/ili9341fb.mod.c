@@ -18,12 +18,23 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0x17634745, "module_layout" },
+	{ 0xb24505be, "cfb_imageblit" },
+	{ 0xf0b69b9c, "cfb_copyarea" },
+	{ 0x93fe4a09, "cfb_fillrect" },
 	{ 0x61036ea2, "platform_driver_unregister" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0x737474f9, "platform_driver_register" },
 	{ 0xf53d8915, "arm_delay_ops" },
+	{ 0xb4e41445, "arm_dma_ops" },
 	{ 0x86c8ad2e, "malloc_sizes" },
+	{ 0xd6b8e852, "request_threaded_irq" },
+	{ 0x9b2fa56b, "register_framebuffer" },
 	{ 0x432fd7f6, "__gpio_set_value" },
+	{ 0xfa2a45e, "__memzero" },
+	{ 0x8d1a1c3b, "fb_set_var" },
+	{ 0x9d669763, "memcpy" },
+	{ 0xa338fb21, "platform_get_irq" },
+	{ 0x1b3022e9, "framebuffer_alloc" },
 	{ 0x403f9529, "gpio_request_one" },
 	{ 0x3757c9b, "of_get_named_gpio_flags" },
 	{ 0xe9525093, "dev_warn" },
@@ -44,13 +55,13 @@ __attribute__((section("__versions"))) = {
 	{ 0xbda0261f, "dev_err" },
 	{ 0x8758668a, "kmem_cache_alloc_trace" },
 	{ 0x3c5d3680, "clk_get_rate" },
-	{ 0xefd6cf06, "__aeabi_unwind_cpp_pr0" },
 	{ 0x788fe103, "iomem_resource" },
 	{ 0x37a0cba, "kfree" },
 	{ 0x9bce482f, "__release_region" },
 	{ 0xc2165d85, "__arm_iounmap" },
 	{ 0x3382adf, "dev_get_drvdata" },
 	{ 0x27e1a049, "printk" },
+	{ 0xefd6cf06, "__aeabi_unwind_cpp_pr0" },
 };
 
 static const char __module_depends[]
@@ -60,4 +71,4 @@ __attribute__((section(".modinfo"))) =
 
 MODULE_ALIAS("of:N*T*CSaak,lcd-2.4*");
 
-MODULE_INFO(srcversion, "B4611466F91BA9D80708AEE");
+MODULE_INFO(srcversion, "570A225E62CBE81CE0C6787");
