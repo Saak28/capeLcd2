@@ -1,4 +1,4 @@
- /*
+/*
  * linux/drivers/video/ili9341fb.c -- FB driver for ILI9341 LCD controller
  * Layout is based on ILI9341fb.c from James Simmons and Geert Uytterhoeven.
  * by Saak Dertadian
@@ -34,14 +34,15 @@
 #include <linux/cpufreq.h>
 #include <linux/dma-mapping.h>
 #include <linux/interrupt.h>
+#include <linux/fb.h>
 
 #include "ili9341fb.h"
 
 static inline unsigned int lcdc_read(struct ili9341fb_par *item,unsigned int addr)
 {
-//	printk(KERN_EMERG "%s ====> 0x0%08X\n",__func__,item->lcd_regs+addr);
+	//	printk(KERN_EMERG "%s ====> 0x0%08X\n",__func__,item->lcd_regs+addr);
 	return (unsigned int)__raw_readl((void *)(item->lcd_regs+addr));
-//	return ioread32(item->lcd_regs+(addr));
+	//	return ioread32(item->lcd_regs+(addr));
 }
 
 static inline void lcdc_write(struct ili9341fb_par *item,unsigned int val,unsigned int addr)
@@ -50,13 +51,13 @@ static inline void lcdc_write(struct ili9341fb_par *item,unsigned int val,unsign
 	__raw_writel(val,(void*)(item->lcd_regs+addr));
 }
 
-static inline void ili9341fb_reg_set(struct ili9341 *item,unsigned char reg,unsigned short value)
+static inline void ili9341fb_reg_set(struct ili9341fb_par *item,unsigned char reg,unsigned short value)
 {
 	lcdc_write(item,0x000000FF&(unsigned int)reg,LCD_LIDD_CS0_ADDR);
 	lcdc_write(item,(unsigned int)value,LCD_LIDD_CS0_DATA);
 }
 
-static inline unsigned int ili9341fb_reg_get(struct ili9341 *item, unsigned char reg)
+static inline unsigned int ili9341fb_reg_get(struct ili9341fb_par *item, unsigned char reg)
 {
 	lcdc_write(item,0x000000FF&(unsigned int)reg,LCD_LIDD_CS0_ADDR);
 	return lcdc_read(item,LCD_LIDD_CS0_DATA);
@@ -123,17 +124,17 @@ static void ili9341_splashScreen(struct ili9341fb_par *par,unsigned char fillDat
 	}
 }
 
-static void ili9341Cls(struct ili9341fb_par *par,unsigned char fillData)
-{
-	int x,y;
+//static void ili9341Cls(struct ili9341fb_par *par,unsigned char fillData)
+//{
+//	int x,y;
 
-	ili9341_set_addr_win(par,0,WIDTH-1,0,HEIGHT-1);
+//	ili9341_set_addr_win(par,0,WIDTH-1,0,HEIGHT-1);
 
-	ili9341_write_cmd(par,CMD_MEMORY_WRITE);
-	for(y=0;y<320;y++)
-		for(x=0;x<240;x++)
-			ili9341_write_data16(par,COLOR_BLACK);
-}
+//	ili9341_write_cmd(par,CMD_MEMORY_WRITE);
+//	for(y=0;y<320;y++)
+//		for(x=0;x<240;x++)
+//			ili9341_write_data16(par,COLOR_BLACK);
+//}
 
 static void ili9341_display_reset(struct ili9341fb_par *par)
 {
@@ -196,7 +197,7 @@ static void ili9341_display_init(struct ili9341fb_par *par)
 	ili9341_write_data(par,0xBE);
 
 	ili9341_write_cmd(par,CMD_MEMORY_ACCESS_CONTROL);				// memory access control = BGR
-//	ili9341_write_data(par,0x88);
+	//	ili9341_write_data(par,0x88);
 	ili9341_write_data(par,0xC8);
 
 	ili9341_write_cmd(par,CMD_FRAME_CONTROL_NORMAL_MODE);			// frame rate control
@@ -232,45 +233,45 @@ static void ili9341_display_init(struct ili9341fb_par *par)
 	mdelay(100);
 	ili9341_write_cmd(par,CMD_DISPLAY_ON);
 	mdelay(100);
-//	ili9341_write_cmd(par,CMD_MEMORY_WRITE);
+	//	ili9341_write_cmd(par,CMD_MEMORY_WRITE);
 }
 
-static void ili9341fb_update_display(struct ili9341fb_par *par)
-{
-//	int ret=0;
-//	u16 *vmem;
-//	int i;
+//static void ili9341fb_update_display(struct ili9341fb_par *par)
+//{
+//	//	int ret=0;
+//	//	u16 *vmem;
+//	//	int i;
 
-////	printk(KERN_EMERG "----> ili9341fb_update_display <----\n");
-//	u16 *vmem16=(u16 *)par->info->screen_base;
-//	vmem=par->ssbuf;
-//	for (i=0;i<WIDTH*HEIGHT*BPP/8/2;i++)
-//	{
-////		vmem[i]=(vmem16[i]&0xFFFF);
+//	////	printk(KERN_EMERG "----> ili9341fb_update_display <----\n");
+//	//	u16 *vmem16=(u16 *)par->info->screen_base;
+//	//	vmem=par->ssbuf;
+//	//	for (i=0;i<WIDTH*HEIGHT*BPP/8/2;i++)
+//	//	{
+//	////		vmem[i]=(vmem16[i]&0xFFFF);
 
-//		vmem[i]=0x0000;
+//	//		vmem[i]=0x0000;
 
-//		if(vmem16[i]&0x0F00)	vmem[i]|=(vmem16[i]&0x0F00)<<5;
-//		if(vmem16[i]&0xF000)	vmem[i]|=(vmem16[i]&0xF000)>>3;
-//		if(vmem16[i]&0x000F)	vmem[i]|=(vmem16[i]&0x000F)<<5;
-//		if(vmem16[i]&0x00F0)	vmem[i]|=(vmem16[i]&0x00F0)>>3;
-//	}
+//	//		if(vmem16[i]&0x0F00)	vmem[i]|=(vmem16[i]&0x0F00)<<5;
+//	//		if(vmem16[i]&0xF000)	vmem[i]|=(vmem16[i]&0xF000)>>3;
+//	//		if(vmem16[i]&0x000F)	vmem[i]|=(vmem16[i]&0x000F)<<5;
+//	//		if(vmem16[i]&0x00F0)	vmem[i]|=(vmem16[i]&0x00F0)>>3;
+//	//	}
 
-//	mutex_lock(&(par->io_lock));
+//	//	mutex_lock(&(par->io_lock));
 
-//	/* Set row/column data window */
-//	ili9341_set_addr_win(par,0,0,WIDTH-1,HEIGHT-1);
+//	//	/* Set row/column data window */
+//	//	ili9341_set_addr_win(par,0,0,WIDTH-1,HEIGHT-1);
 
-//	/* Internal RAM write command */
-//	ili9341_write_cmd(par,CMD_WRITE_RAM_CMD);
+//	//	/* Internal RAM write command */
+//	//	ili9341_write_cmd(par,CMD_WRITE_RAM_CMD);
 
-//	/* Blast framebuffer to ILI9341 internal display RAM */
-//	ret=ili9341_write_data_buf(par,u8 *)vmem,WIDTH*HEIGHT*BPP/8);
-//	if(ret<0)
-//		pr_err("%s: spi_write failed to update display buffer\n",par->info->fix.id);
+//	//	/* Blast framebuffer to ILI9341 internal display RAM */
+//	//	ret=ili9341_write_data_buf(par,u8 *)vmem,WIDTH*HEIGHT*BPP/8);
+//	//	if(ret<0)
+//	//		pr_err("%s: spi_write failed to update display buffer\n",par->info->fix.id);
 
-//	mutex_unlock(&(par->io_lock));
-}
+//	//	mutex_unlock(&(par->io_lock));
+//}
 
 int RequestGpio(int gpio,int mode, char* str)
 {
@@ -280,69 +281,65 @@ int RequestGpio(int gpio,int mode, char* str)
 	return ret;
 }
 
-static void ili9341fb_deferred_io(struct fb_info *info,struct list_head *pagelist)
-{
-//	printk(KERN_EMERG "----> ili9341fb_deferred_io <----\n");
-	ili9341fb_update_display(info->par);
-}
+//static void ili9341fb_deferred_io(struct fb_info *info,struct list_head *pagelist)
+//{
+//	//	printk(KERN_EMERG "----> ili9341fb_deferred_io <----\n");
+//	ili9341fb_update_display(info->par);
+//}
 
-static void ili9341fb_update_display_deferred(struct fb_info *info)
-{
-	struct fb_deferred_io *fbdefio=info->fbdefio;
-//	printk(KERN_EMERG "----> ili9341fb_update_display_deferred <----\n");
-	schedule_delayed_work(&info->deferred_work,fbdefio->delay);
-}
+//static void ili9341fb_update_display_deferred(struct fb_info *info)
+//{
+//	struct fb_deferred_io *fbdefio=info->fbdefio;
+//	//	printk(KERN_EMERG "----> ili9341fb_update_display_deferred <----\n");
+//	schedule_delayed_work(&info->deferred_work,fbdefio->delay);
+//}
 
-static void ili9341fb_fillrect(struct fb_info *info,const struct fb_fillrect *rect)
-{
-//	printk(KERN_INFO "----> ili9341fb_fillrect <----\n");
-	sys_fillrect(info,rect);
-	ili9341fb_update_display_deferred(info);
-}
+//static void ili9341fb_fillrect(struct fb_info *info,const struct fb_fillrect *rect)
+//{
+//	//	printk(KERN_INFO "----> ili9341fb_fillrect <----\n");
+//	sys_fillrect(info,rect);
+//	ili9341fb_update_display_deferred(info);
+//}
 
-static void ili9341fb_copyarea(struct fb_info *info,const struct fb_copyarea *area)
-{
-//	printk(KERN_INFO "----> ili9341fb_copyarea <----\n");
-	sys_copyarea(info, area);
-	ili9341fb_update_display_deferred(info);
-}
+//static void ili9341fb_copyarea(struct fb_info *info,const struct fb_copyarea *area)
+//{
+//	//	printk(KERN_INFO "----> ili9341fb_copyarea <----\n");
+//	sys_copyarea(info, area);
+//	ili9341fb_update_display_deferred(info);
+//}
 
-static void ili9341fb_imageblit(struct fb_info *info,const struct fb_image *image)
-{
-//	printk(KERN_INFO "----> ili9341fb_imageblit <----\n");
-	sys_imageblit(info,image);
-	ili9341fb_update_display_deferred(info);
-}
+//static void ili9341fb_imageblit(struct fb_info *info,const struct fb_image *image)
+//{
+//	//	printk(KERN_INFO "----> ili9341fb_imageblit <----\n");
+//	sys_imageblit(info,image);
+//	ili9341fb_update_display_deferred(info);
+//}
 
-static int ili9341fb_setcolreg(unsigned regno,unsigned red,unsigned green,
-							   unsigned blue,unsigned transp,
-							   struct fb_info *info)
+static int ili9341fb_setcolreg(unsigned regno,unsigned red,unsigned green,unsigned blue,unsigned transp,struct fb_info *info)
 {
-//	if(regno>=MAX_PALETTE)
-//		return -EINVAL;
+	struct ili9341fb_par *par=info->par;
 
-////	((u32*)(info->pseudo_palette))[regno]=(MAX_PALETTE-1)-regno;	// Negative
-//	((u32*)(info->pseudo_palette))[regno]=regno;
-////	printk(KERN_EMERG "----> ili9341fb_setcolreg <----%d - R:%04X, G:%04X, B:%04X, B:%04X X:%04X\n",regno,red,green,blue,c,((u16*)(info->pseudo_palette))[regno]);
+	if(regno>=16)
+		return 1;
+
+	if(info->fix.visual==FB_VISUAL_DIRECTCOLOR)
+		return 1;
+
+	if((info->var.bits_per_pixel==16) && regno<16)
+	{
+		red>>=(16-info->var.red.length);
+		red<<=info->var.red.offset;
+
+		green>>=(16-info->var.green.length);
+		green<<=info->var.green.offset;
+
+		blue>>=(16-info->var.blue.length);
+		blue<<=info->var.blue.offset;
+
+		par->pseudo_palette[regno]=red | green | blue;
+	}
 	return 0;
 }
-
-//static struct fb_ops ili9341fb_ops=
-//{
-//	.owner			= THIS_MODULE,
-//	.fb_read		= fb_sys_read,
-//	.fb_write		= ili9341fb_write,
-//	.fb_fillrect	= ili9341fb_fillrect,
-//	.fb_copyarea	= ili9341fb_copyarea,
-//	.fb_imageblit	= ili9341fb_imageblit,
-//	.fb_setcolreg	= ili9341fb_setcolreg,
-//};
-
-//static struct fb_deferred_io ili9341fb_defio=
-//{
-//	.delay			= HZ/20,
-//	.deferred_io	= ili9341fb_deferred_io,
-//};
 
 int LoadGpioFromDT(struct device_node *np,char *name)
 {
@@ -352,8 +349,8 @@ int LoadGpioFromDT(struct device_node *np,char *name)
 		printk(KERN_EMERG "failed to find ILI9341-%s!\n",name);
 		return -EINVAL;
 	}
-//	else
-//		printk(KERN_EMERG "ILI9341-%s=%d\n",name,gpio);
+	//	else
+	//		printk(KERN_EMERG "ILI9341-%s=%d\n",name,gpio);
 	return  1;
 }
 
@@ -371,7 +368,7 @@ static int cpufreq_transition(struct notifier_block *nb,unsigned long val,void *
 		if(priv->lcd_fck_rate != clk_get_rate(priv->lcdc_clk))
 		{
 			priv->lcd_fck_rate = clk_get_rate(priv->lcdc_clk);
-//			tilcdc_crtc_update_clk(priv->crtc);
+			//			tilcdc_crtc_update_clk(priv->crtc);
 		}
 	}
 
@@ -380,15 +377,60 @@ static int cpufreq_transition(struct notifier_block *nb,unsigned long val,void *
 
 static int fb_ioctl(struct fb_info *info,unsigned int cmd,unsigned long arg)
 {
-	//struct lcd_sync_arg sync_arg;
+//	struct fb_cmap cmap_from;
+//	struct fb_cmap_user cmap;
+//	void __user *argp = (void __user *)arg;
+//	struct lcd_sync_arg sync_arg;
+	long ret = 0;
 
+	printk(KERN_EMERG "%s: ---> %d\n", __func__,cmd);
 	switch (cmd)
 	{
-		case FBIOPUT_VSCREENINFO:
-		return 0;
-		default:
+//	case FBIOPUT_VSCREENINFO:
+//		return 0;
+//	case FBIOGET_CONTRAST:
+//	case FBIOPUT_CONTRAST:
+//	case FBIGET_BRIGHTNESS:
+//	case FBIPUT_BRIGHTNESS:
+//	case FBIGET_COLOR:
+//	case FBIPUT_COLOR:
+//		return -ENOTTY;
+//	case FBCMD_GET_CURRENTPAR:
+//		if (copy_to_user((void *)arg, (void *)&current_par,sizeof(struct atafb_par)))
+//			return -EFAULT;
+//		return 0;
+//	case FBIPUT_HSYNC:
+//		if (copy_from_user(&sync_arg, (char *)arg,
+//				sizeof(struct lcd_sync_arg)))
+//			return -EFAULT;
+//		lcd_cfg_horizontal_sync(sync_arg.back_porch,
+//					sync_arg.pulse_width,
+//					sync_arg.front_porch);
+//		break;
+//	case FBIPUT_VSYNC:
+//		if (copy_from_user(&sync_arg, (char *)arg,
+//				sizeof(struct lcd_sync_arg)))
+//			return -EFAULT;
+//		lcd_cfg_vertical_sync(sync_arg.back_porch,
+//					sync_arg.pulse_width,
+//					sync_arg.front_porch);
+//		break;
+//	case FBIO_WAITFORVSYNC:
+//		return fb_wait_for_vsync(info);
+//	case FBIOGETCMAP:
+//		if(copy_from_user(&cmap, argp, sizeof(cmap)))
+//			return -EFAULT;
+//		if (!lock_fb_info(info))
+//			return -ENODEV;
+//		cmap_from=info->cmap;
+//		unlock_fb_info(info);
+//		ret=fb_cmap_to_user(&cmap_from,&cmap);
+//		break;
+	default:
+		printk(KERN_INFO "%s: %d\n", __func__,cmd);
 		return -EINVAL;
 	}
+	return ret;
 }
 
 static int __init ili9341fb_video_alloc(struct ili9341fb_par *item)
@@ -407,6 +449,7 @@ static int __init ili9341fb_video_alloc(struct ili9341fb_par *item)
 	if((pages_count*PAGE_SIZE)<frame_size)
 		pages_count++;
 	dev_dbg(item->dev, "%s: item=0x%p pages_count=%u per each of %d buffer(s)\n",__func__,(void *)item,pages_count,LCD_NUM_BUFFERS);
+	dev_dbg(item->dev,"%s: PAGE_SIZE=%d\n", __func__,PAGE_SIZE);
 
 	// Reserve DMA-able RAM, set up fix.
 	item->vram_size=pages_count*PAGE_SIZE*LCD_NUM_BUFFERS;
@@ -417,7 +460,8 @@ static int __init ili9341fb_video_alloc(struct ili9341fb_par *item)
 		return -ENOMEM;
 	}
 	memset(item->vram_virt,0,item->vram_size);
-	item->info->fix.smem_start=(int)item->vram_virt;
+//	item->info->fix.smem_start=(int)item->vram_virt;
+	item->info->fix.smem_start=(int)item->vram_phys;
 	item->info->fix.smem_len=item->vram_size;
 
 	item->info->screen_base=(char __iomem *)item->vram_virt;
@@ -438,23 +482,23 @@ static int lcd_cfg_dma(struct ili9341fb_par *item,int burst_size,int fifo_th)
 	reg=(lcdc_read(item,LCD_DMA_CTRL_REG)&0x00000005);	// | LCD_DUAL_FRAME_BUFFER_ENABLE; not for LIDD DMA??
 	switch(burst_size)
 	{
-		case 1:
-			reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_1);
-			break;
-		case 2:
-			reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_2);
-			break;
-		case 4:
-			reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_4);
-			break;
-		case 8:
-			reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_8);
-			break;
-		case 16:
-			reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_16);
-			break;
-		default:
-			return -EINVAL;
+	case 1:
+		reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_1);
+		break;
+	case 2:
+		reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_2);
+		break;
+	case 4:
+		reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_4);
+		break;
+	case 8:
+		reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_8);
+		break;
+	case 16:
+		reg |= LCD_DMA_BURST_SIZE(LCD_DMA_BURST_16);
+		break;
+	default:
+		return -EINVAL;
 	}
 	reg|=(fifo_th<<8);
 	reg|=BIT(2);					// EOF_INTEN
@@ -517,7 +561,7 @@ static int ili9341fb_probe(struct platform_device *pdev)
 	char *state_name;
 	struct pinctrl_state *state;
 	u32 reg_int;
-//	unsigned int i,d,d2,tab[16];
+	//	unsigned int i,d,d2,tab[16];
 
 	printk(KERN_EMERG "%s ====> 0 <====\n", __func__);
 
@@ -553,7 +597,7 @@ static int ili9341fb_probe(struct platform_device *pdev)
 	item->lcdc_regs_size=lcdc_regs_size;
 	item->res=res;
 
-	item->lcd_regs=ioremap(res.start,lcdc_regs_size);
+	item->lcd_regs=(resource_size_t)ioremap(res.start,lcdc_regs_size);
 	if(!item->lcd_regs)
 	{
 		ret=-EINVAL;
@@ -593,14 +637,14 @@ static int ili9341fb_probe(struct platform_device *pdev)
 	item->lcd_fck_rate=clk_get_rate(item->lcdc_clk);
 	item->freq_transition.notifier_call=cpufreq_transition;
 	ret=cpufreq_register_notifier(&item->freq_transition,
-	CPUFREQ_TRANSITION_NOTIFIER);
+								  CPUFREQ_TRANSITION_NOTIFIER);
 	if(ret)
 	{
 		dev_err(&pdev->dev, "failed to register cpufreq notifier\n");
 		goto err_clk_get;
 	}
 
-//	pm_runtime_irq_safe(&pdev->dev);
+	pm_runtime_irq_safe(&pdev->dev);
 	pm_runtime_enable(&pdev->dev);
 	pm_runtime_get_sync(&pdev->dev);
 
@@ -660,9 +704,9 @@ static int ili9341fb_probe(struct platform_device *pdev)
 		goto err_clk_get;
 	}
 	dev_err(&pdev->dev,"%s: RS=%d\n",__func__,item->lcd_rs);
-//	gpio_set_value(item->lcd_rs,0);
-//	udelay(120);
-//	gpio_set_value(item->lcd_rs,1);
+	//	gpio_set_value(item->lcd_rs,0);
+	//	udelay(120);
+	//	gpio_set_value(item->lcd_rs,1);
 
 	// //////////////////////////////////////////////////////////
 	// Setting up AM335X LCDC Controller
@@ -680,23 +724,23 @@ static int ili9341fb_probe(struct platform_device *pdev)
 
 	cfg=LCD_V2_DMA_CLK_EN | LCD_V2_LIDD_CLK_EN | LCD_V2_CORE_CLK_EN;	// Turn on LIDD clock and DMA clock, core clock doesn't help DMA :( ?
 	lcdc_write(item,cfg,LCD_CLKC_ENABLE);
-//	dev_warn(&pdev->dev,"%s: LCD_CLKC_ENABLE=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_CLKC_ENABLE));
+	//	dev_warn(&pdev->dev,"%s: LCD_CLKC_ENABLE=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_CLKC_ENABLE));
 
-//	cfg=0 | LCD_CLK_DIVISOR(1);											// LCDC Mode = LIDD
+	//	cfg=0 | LCD_CLK_DIVISOR(1);											// LCDC Mode = LIDD
 	cfg=0;											// LCDC Mode = LIDD
 	lcdc_write(item,cfg,LCD_CTRL);
-//	dev_warn(&pdev->dev,"%s: LCD_CTRL=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_CTRL));
+	//	dev_warn(&pdev->dev,"%s: LCD_CTRL=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_CTRL));
 	lcdc_write(item,LCD_LIDD_TYPE_8080,LCD_LIDD_CTRL);					// 8080 display, DMA (NOT YET) enabled
-//	dev_warn(&pdev->dev,"%s: LCD_LIDD_CTRL=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_LIDD_CTRL));
+	//	dev_warn(&pdev->dev,"%s: LCD_LIDD_CTRL=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_LIDD_CTRL));
 
 	// Clocking: 00000000011001000000011110001100
 	//          _____------____-----______----__
 	//			W_SU W_STR W_H R_SU R_STR R_H TA
 	//			0    3     2   0    30    3   0
-//	cfg=(0<<0) | (3<<2) | (30<<6) | (0<<12) | (2<<17) | (3<<21) | (0<<27); // Clocking
+	//	cfg=(0<<0) | (3<<2) | (30<<6) | (0<<12) | (2<<17) | (3<<21) | (0<<27); // Clocking
 	cfg=(0<<0) | (0x01<<2) | (0x01<<6) | (0x01<<12) | (1<<17) | (1<<21) | (1<<27); // Clocking
 	lcdc_write(item,cfg,LCD_CS0_CONF);
-//	dev_warn(&pdev->dev,"%s: LCD_CS0_CONF=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_CS0_CONF));
+	//	dev_warn(&pdev->dev,"%s: LCD_CS0_CONF=0x%08X\n", __func__,(unsigned short)lcdc_read(item,LCD_CS0_CONF));
 	printk(KERN_EMERG "%s: Initialized LCDC controller\n",__func__);
 
 	// //////////////////////////////////////////////////////////
@@ -744,46 +788,8 @@ static int ili9341fb_probe(struct platform_device *pdev)
 	// INIT LCD CONTROLLER
 	// //////////////////////////////////////////////////////////
 	ili9341_display_reset(item);
-	ili9341_display_init(item);
-	ili9341_splashScreen(item,COLOR_BLACK);	// Splash Screen
-	dev_dbg(&pdev->dev,"Performed setup\n");
 
-	// Set up all kinds of fun DMA
-	lcdc_write(item,0,LCD_DMA_CTRL_REG);					// Start out with a blank slate
-	lcd_cfg_dma(item,16,0);								// DMA burst and FIFO threshold
-	reg_int=LCD_V2_UNDERFLOW_INT_ENA | LCD_SYNC_LOST | LCD_V2_DONE_INT_ENA;
-	lcdc_write(item,reg_int,LCD_INT_ENABLE_SET_REG);
-
-	lcdc_write(item,item->dma_start,LCD_DMA_FRM_BUF_BASE_ADDR_0_REG);
-	lcdc_write(item,item->dma_end,LCD_DMA_FRM_BUF_CEILING_ADDR_0_REG);
-	lcdc_write(item,item->dma_start,LCD_DMA_FRM_BUF_BASE_ADDR_1_REG);
-	lcdc_write(item,item->dma_end,LCD_DMA_FRM_BUF_CEILING_ADDR_1_REG);
-
-	info->fbops=&ili9341fb_fbops;
-	ret=register_framebuffer(info);
-	if(ret<0)
-	{
-		ret=-EIO;
-		dev_err(&pdev->dev,"%s: unable to register_frambuffer\n",__func__);
-		goto out_pages;
-	}
-	dev_dbg(&pdev->dev,"Registered framebuffer.\n");
-
-//	// Set up LCD coordinates as necessary
-	ili9341_set_addr_win(item,0,WIDTH-1,0,HEIGHT-1);
-	ili9341_write_cmd(item,CMD_MEMORY_WRITE);	//set up for data before DMA begins
-
-	// Try to get IRQ for DMA
-	ret=request_irq(item->irq,ili9341fb_irq_handler,0,DRIVER_NAME,item);
-	if(ret)
-	{
-		ret=-EIO;
-		goto out_framebuffer;
-	}
-
-	ili9341fb_dma_setstatus(item,1);	//enable DMA
-
-
+//	unsigned int tab[16];
 //	lcdc_write(item,CMD_READ_DISPLAY_ID_INFO,LCD_LIDD_CS0_ADDR);
 //	tab[0]=lcdc_read(item,LCD_LIDD_CS0_DATA);
 //	tab[1]=lcdc_read(item,LCD_LIDD_CS0_DATA);
@@ -811,95 +817,162 @@ static int ili9341fb_probe(struct platform_device *pdev)
 //	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[4]);
 //	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[5]);
 
+	ili9341_display_init(item);
+	ili9341_splashScreen(item,COLOR_BLACK);	// Splash Screen
+	dev_dbg(&pdev->dev,"Performed setup\n");
+
+	// Set up all kinds of fun DMA
+	lcdc_write(item,0,LCD_DMA_CTRL_REG);					// Start out with a blank slate
+	lcd_cfg_dma(item,16,0);								// DMA burst and FIFO threshold
+	reg_int=LCD_V2_UNDERFLOW_INT_ENA | LCD_SYNC_LOST | LCD_V2_DONE_INT_ENA;
+	lcdc_write(item,reg_int,LCD_INT_ENABLE_SET_REG);
+
+	lcdc_write(item,item->dma_start,LCD_DMA_FRM_BUF_BASE_ADDR_0_REG);
+	lcdc_write(item,item->dma_end,LCD_DMA_FRM_BUF_CEILING_ADDR_0_REG);
+	lcdc_write(item,item->dma_start,LCD_DMA_FRM_BUF_BASE_ADDR_1_REG);
+	lcdc_write(item,item->dma_end,LCD_DMA_FRM_BUF_CEILING_ADDR_1_REG);
+
+	info->fbops=&ili9341fb_fbops;
+	ret=register_framebuffer(info);
+	if(ret<0)
+	{
+		ret=-EIO;
+		dev_err(&pdev->dev,"%s: unable to register_frambuffer\n",__func__);
+		goto out_pages;
+	}
+	dev_dbg(&pdev->dev,"Registered framebuffer.\n");
+
+	//	// Set up LCD coordinates as necessary
+	ili9341_set_addr_win(item,0,WIDTH-1,0,HEIGHT-1);
+	ili9341_write_cmd(item,CMD_MEMORY_WRITE);	//set up for data before DMA begins
+
+	// Try to get IRQ for DMA
+	ret=request_irq(item->irq,ili9341fb_irq_handler,0,DRIVER_NAME,item);
+	if(ret)
+	{
+		ret=-EIO;
+		goto out_framebuffer;
+	}
+
+	ili9341fb_dma_setstatus(item,1);	//enable DMA
+
+
+	//	lcdc_write(item,CMD_READ_DISPLAY_ID_INFO,LCD_LIDD_CS0_ADDR);
+	//	tab[0]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[1]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[2]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[3]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[4]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[5]=0x12345678;
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[0]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[1]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[2]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[3]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[4]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[5]);
+	//	lcdc_write(item,CMD_READ_DISPLAY_STATUS,LCD_LIDD_CS0_ADDR);
+	//	tab[0]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[1]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[2]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[3]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[4]=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//	tab[5]=0x12345678;
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[0]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[1]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[2]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[3]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[4]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[5]);
+
 	// ili9341 LCD Driver Check
-//	signature=ili9341_reg_get(item,CMD_READ_DISPLAY_ID_INFO);
-//	printk(KERN_EMERG "%s: driver signature=0x%04x\n",__func__,(unsigned short)signature);
-//	if((unsigned short)signature!=0x8989)
-//		dev_warn(&pdev->dev,"%s: unknown driver signature 0x%04x (reg_get failure?)\n", __func__, (unsigned short)signature);
+	//	signature=ili9341_reg_get(item,CMD_READ_DISPLAY_ID_INFO);
+	//	printk(KERN_EMERG "%s: driver signature=0x%04x\n",__func__,(unsigned short)signature);
+	//	if((unsigned short)signature!=0x8989)
+	//		dev_warn(&pdev->dev,"%s: unknown driver signature 0x%04x (reg_get failure?)\n", __func__, (unsigned short)signature);
 
-//	for(i=0;i<10;i++)
-//	{
-//		lcdc_write(item,CMD_READ_DISPLAY_ID_INFO,LCD_LIDD_CS0_ADDR);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		d<<=8;
-//		d|=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		d<<=8;
-//		d|=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		d<<=8;
-//		d|=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> DisplayID:0x%08X\n", __func__,i,(unsigned short)d);
+	//	for(i=0;i<10;i++)
+	//	{
+	//		lcdc_write(item,CMD_READ_DISPLAY_ID_INFO,LCD_LIDD_CS0_ADDR);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		d<<=8;
+	//		d|=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		d<<=8;
+	//		d|=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		d<<=8;
+	//		d|=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> DisplayID:0x%08X\n", __func__,i,(unsigned short)d);
 
-//		lcdc_write(item,CMD_READ_DISPLAY_STATUS,LCD_LIDD_CS0_ADDR);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		lcdc_write(item,CMD_READ_DISPLAY_STATUS,LCD_LIDD_CS0_ADDR);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,(unsigned short)d);
 
-//		ili9341_write_cmd(item,CMD_READ_DISPLAY_STATUS);
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
-//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
-
-
-//		lcdc_write(item,CMD_READ_DISPLAY_POWER_MODE,LCD_LIDD_CS0_ADDR);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> PowerMode:   0x%08X\n", __func__,i,(unsigned short)d);
-//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
-//		dev_warn(&pdev->dev,"%s: %d ---> PowerMode:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		ili9341_write_cmd(item,CMD_READ_DISPLAY_STATUS);
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
+	//		dev_warn(&pdev->dev,"%s: %d ---> Status:   0x%08X\n", __func__,i,lcdc_read(item,LCD_LIDD_CS0_DATA));
 
 
-//		dev_warn(&pdev->dev,"___________________________________________________\n");
-//	}
+	//		lcdc_write(item,CMD_READ_DISPLAY_POWER_MODE,LCD_LIDD_CS0_ADDR);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> PowerMode:   0x%08X\n", __func__,i,(unsigned short)d);
+	//		d=lcdc_read(item,LCD_LIDD_CS0_DATA);
+	//		dev_warn(&pdev->dev,"%s: %d ---> PowerMode:   0x%08X\n", __func__,i,(unsigned short)d);
 
-//	lcdc_write(item,CMD_READ_DISPLAY_STATUS,LCD_LIDD_CS0_ADDR);
-//	tab[0]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
-//	tab[1]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
-//	tab[2]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
-//	tab[3]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
-//	tab[4]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
-//	tab[5]=ioread32(item->lcd_regs+LCD_PID);
-//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[0]);
-//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[1]);
-//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[2]);
-//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[3]);
-//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[4]);
-//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[5]);
 
-//	iounmap((void __iomem *)item->lcd_regs);
-//	release_mem_region(item->res.start,item->lcdc_regs_size);
-//	kfree(item);
+	//		dev_warn(&pdev->dev,"___________________________________________________\n");
+	//	}
+
+	//	lcdc_write(item,CMD_READ_DISPLAY_STATUS,LCD_LIDD_CS0_ADDR);
+	//	tab[0]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
+	//	tab[1]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
+	//	tab[2]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
+	//	tab[3]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
+	//	tab[4]=ioread32(item->lcd_regs+LCD_LIDD_CS0_DATA);
+	//	tab[5]=ioread32(item->lcd_regs+LCD_PID);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[0]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[1]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[2]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[3]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[4]);
+	//	dev_warn(&pdev->dev,"%s: tab---> Status:   0x%08X\n", __func__,tab[5]);
+
+	//	iounmap((void __iomem *)item->lcd_regs);
+	//	release_mem_region(item->res.start,item->lcdc_regs_size);
+	//	kfree(item);
 
 	return 0;
 
 out_framebuffer:
-//	unregister_framebuffer(info);
+	//	unregister_framebuffer(info);
 out_pages:
-//	ili9341_video_free(item);
+	//	ili9341_video_free(item);
 out_info:
-//	framebuffer_release(info);
+	//	framebuffer_release(info);
 out_clk_enable:
-//	printk(KERN_EMERG "%s ====> END-0 <====\n", __func__);
-//	clk_disable(item->lcdc_clk);
-//	printk(KERN_EMERG "%s ====> END-1 <====\n", __func__);
-//	clk_disable(item->disp_clk);
-//	printk(KERN_EMERG "%s ====> END-2 <====\n", __func__);
+	//	printk(KERN_EMERG "%s ====> END-0 <====\n", __func__);
+	//	clk_disable(item->lcdc_clk);
+	//	printk(KERN_EMERG "%s ====> END-1 <====\n", __func__);
+	//	clk_disable(item->disp_clk);
+	//	printk(KERN_EMERG "%s ====> END-2 <====\n", __func__);
 err_clk_get:
-//	pm_runtime_put_sync(&dev->dev);
-//	pm_runtime_disable(&dev->dev);
-//	clk_put(item->lcdc_clk);
+	//	pm_runtime_put_sync(&dev->dev);
+	//	pm_runtime_disable(&dev->dev);
+	//	clk_put(item->lcdc_clk);
 out_ioremap:
 	iounmap((void __iomem *)item->lcd_regs);
 	printk(KERN_EMERG "%s ====> END-3 <====\n", __func__);
 out_request_mem:
-//	release_mem_region(res_res->start, lcdc_regs_size);
+	//	release_mem_region(res_res->start, lcdc_regs_size);
 out_item:
 	printk(KERN_EMERG "%s ====> END-4 <====\n", __func__);
 	kfree(item);
@@ -912,10 +985,9 @@ out:
 
 static int ili9341fb_remove(struct platform_device *pdev)
 {
-	printk(KERN_EMERG "%s ====> 0 <====\n", __func__);
+	struct ili9341fb_par* item=(struct ili9341fb_par*)dev_get_drvdata(&pdev->dev);
 
-	struct ili9341fb_par* item=dev_get_drvdata(&pdev->dev);
-
+	printk(KERN_EMERG "%s ====> 0 <====\n",__func__);
 	iounmap((void __iomem *)item->lcd_regs);
 	release_mem_region(item->res.start,item->lcdc_regs_size);
 	kfree(item);
@@ -945,34 +1017,34 @@ static struct platform_driver ili9341fb_driver=
 		.owner =THIS_MODULE,
 		.of_match_table=ili9341fb_dt_ids,
 	},
-//	.id_table=ili9341fb_device_id,
+	//	.id_table=ili9341fb_device_id,
 	.probe=ili9341fb_probe,
 	.remove=ili9341fb_remove,
-//	.suspend = xxxfb_suspend, /* optional but recommended */
-//	.resume = xxxfb_resume,   /* optional but recommended */
+	//	.suspend = xxxfb_suspend, /* optional but recommended */
+	//	.resume = xxxfb_resume,   /* optional but recommended */
 };
 
 static int __init ili9341fb_init(void)
 {
-//	int ret;
+	//	int ret;
 
 	printk(KERN_EMERG "================================\n");
 	printk(KERN_EMERG "ILI9341Init\n");
 
-//	ret=platform_device_register(&ili9341fb_device);
-//	if(ret)
-//	{
-//		printk(KERN_EMERG "ILI9341Init --> 0\n");
-//		platform_driver_unregister(&ili9341fb_device);
-//		return ret;
-//	}
+	//	ret=platform_device_register(&ili9341fb_device);
+	//	if(ret)
+	//	{
+	//		printk(KERN_EMERG "ILI9341Init --> 0\n");
+	//		platform_driver_unregister(&ili9341fb_device);
+	//		return ret;
+	//	}
 	return platform_driver_register(&ili9341fb_driver);
 }
 
 static void __exit ili9341fb_exit(void)
 {
 	printk(KERN_EMERG "ILI9341Exit\n");
-//	platform_device_unregister(&ili9341fb_device);
+	//	platform_device_unregister(&ili9341fb_device);
 	platform_driver_unregister(&ili9341fb_driver);
 	printk(KERN_EMERG "================================\n");
 }

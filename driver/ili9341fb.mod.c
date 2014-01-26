@@ -44,6 +44,7 @@ __attribute__((section("__versions"))) = {
 	{ 0xe914e41e, "strcpy" },
 	{ 0x107dbeac, "__pm_runtime_resume" },
 	{ 0x623106b8, "pm_runtime_enable" },
+	{ 0x633d0990, "pm_runtime_irq_safe" },
 	{ 0xadaa2657, "cpufreq_register_notifier" },
 	{ 0xa710e381, "clk_enable" },
 	{ 0x3a247c7e, "clk_get" },
@@ -71,4 +72,4 @@ __attribute__((section(".modinfo"))) =
 
 MODULE_ALIAS("of:N*T*CSaak,lcd-2.4*");
 
-MODULE_INFO(srcversion, "570A225E62CBE81CE0C6787");
+MODULE_INFO(srcversion, "5DA6E05F4ADE2E776A47D97");

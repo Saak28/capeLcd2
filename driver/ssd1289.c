@@ -381,7 +381,7 @@ obj-$(CONFIG_FB_UVESA)            += uvesafb.o
 +#define SSD1289_REG_GDDRAM_X_ADDR    0x4e
 +#define SSD1289_REG_GDDRAM_Y_ADDR    0x4f
 +
-+#define LCD_NUM_BUFFERS	1		// was 2
++#define LCD_NUM_BUFFERS			2		// was 2
 +#define DRIVER_NAME "ssd1289"
 +
 +struct ssd1289 {

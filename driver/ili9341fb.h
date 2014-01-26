@@ -27,7 +27,7 @@ struct ili9341_function
 
 typedef struct ili9341fb_par
 {
-	void __iomem *mmio;
+//	void __iomem *mmio;
 	struct device *dev;
 	struct resource res;
 	unsigned int lcdc_regs_size;
@@ -55,26 +55,14 @@ typedef struct ili9341fb_par
 	struct notifier_block freq_transition;
 
 
-	struct mutex io_lock;
-	int xoff;
-	int yoff;
+//	struct mutex io_lock;
+//	int xoff;
+//	int yoff;
 
-//	int lcd_d0;
-//	int lcd_d1;
-//	int lcd_d2;
-//	int lcd_d3;
-//	int lcd_d4;
-//	int lcd_d5;
-//	int lcd_d6;
-//	int lcd_d7;
-//	int lcd_cs;
-//	int lcd_dc;
-//	int lcd_wr;
-//	int lcd_rd;
 	int lcd_rs;
 
-	u16 *ssbuf;
-	u8 *buf;
+//	u16 *ssbuf;
+//	u8 *buf;
 };
 
 
@@ -83,27 +71,27 @@ static int fb_ioctl(struct fb_info *info,unsigned int cmd,unsigned long arg);
 static int __init ili9341fb_video_alloc(struct ili9341fb_par *item);
 //static int lcd_cfg_dma(struct ssd1289 *item,int burst_size,int fifo_th);
 
-static struct resource ili9341_resources[]=
-{
-	[0]=
-	{
-		.start = LCD_BASE_ADDR,				//LCD BASE ADDR
-		.end   = LCD_BASE_ADDR+SZ_4K-1,
-		.flags = IORESOURCE_MEM,
-	},
-	[1]=
-	{
-		.start = AM33XX_IRQ_LCD,			//LCD BASE ADDR
-		.end   = AM33XX_IRQ_LCD,
-		.flags = IORESOURCE_IRQ,
-	}
-};
+//static struct resource ili9341_resources[]=
+//{
+//	[0]=
+//	{
+//		.start = LCD_BASE_ADDR,				//LCD BASE ADDR
+//		.end   = LCD_BASE_ADDR+SZ_4K-1,
+//		.flags = IORESOURCE_MEM,
+//	},
+//	[1]=
+//	{
+//		.start = AM33XX_IRQ_LCD,			//LCD BASE ADDR
+//		.end   = AM33XX_IRQ_LCD,
+//		.flags = IORESOURCE_IRQ,
+//	}
+//};
 
 static struct fb_fix_screeninfo ili9341fb_fix=
 {
-	.id =			"ILI9341",
+	.id =			DRIVER_NAME,
 	.type =			FB_TYPE_PACKED_PIXELS,
-	.visual =		FB_VISUAL_DIRECTCOLOR,
+	.visual =		FB_VISUAL_TRUECOLOR,
 	.xpanstep =		0,
 	.ypanstep =		0,
 	.ywrapstep =	0,
@@ -118,6 +106,16 @@ static struct fb_var_screeninfo ili9341fb_var=
 	.xres_virtual =	WIDTH,
 	.yres_virtual =	HEIGHT,
 	.bits_per_pixel=BPP,
+//	.red =			{6, 5, 0},
+//	.green =		{11, 5, 0},
+//	.blue =			{0, 6, 0},
+	.red =			{11, 5, 0},
+	.green =		{5, 6, 0},
+	.blue =			{0, 5, 0},
+	.activate =		FB_ACTIVATE_FORCE,	//FB_ACTIVATE_NOW,
+	.height =		HEIGHT,
+	.width =		WIDTH,
+	.vmode =		FB_VMODE_NONINTERLACED,
 	.nonstd	=		0,
 };
 
@@ -337,3 +335,21 @@ static struct fb_ops ili9341fb_fbops=
 #define COLOR_THEME_DEFAULT_LIGHTER         COLOR_THEME_LIMEGREEN_LIGHTER
 #define COLOR_THEME_DEFAULT_SHADOW          COLOR_THEME_LIMEGREEN_SHADOW
 #define COLOR_THEME_DEFAULT_ACCENT          COLOR_THEME_LIMEGREEN_ACCENT
+
+struct lcd_sync_arg
+{
+	int back_porch;
+	int front_porch;
+	int pulse_width;
+};
+
+/* ioctls */
+#define FBIOGET_CONTRAST	_IOR('F', 1, int)
+#define FBIOPUT_CONTRAST	_IOW('F', 2, int)
+#define FBIGET_BRIGHTNESS	_IOR('F', 3, int)
+#define FBIPUT_BRIGHTNESS	_IOW('F', 3, int)
+#define FBIGET_COLOR		_IOR('F', 5, int)
+#define FBIPUT_COLOR		_IOW('F', 6, int)
+#define FBIPUT_HSYNC		_IOW('F', 9, int)
+#define FBIPUT_VSYNC		_IOW('F', 10, int)
+#define FBIOGETCMAP			0x4604
