@@ -1,0 +1,14 @@
+#!/bin/bash
+
+PATH="/home/saak/beagle/linux-dev/KERNEL/drivers/video/"
+DRIVER="/home/saak/beagle/cape/capeLcd24/driver/ili9341fb"
+OVERLAY="/home/saak/beagle/cape/capeLcd24/overlay/"
+CAPES="/home/saak/beagle/linux-dev/KERNEL/firmware/capes/"
+KERNEL_DTSI="/home/saak/beagle/linux-dev_3.8/KERNEL/arch/arm/boot/dts/am335x-bone-common.dtsi"
+DTSI="am335x-bone-common.dtsi"
+
+/bin/cp $DRIVER.c $PATH
+/bin/cp $DRIVER.h $PATH
+/bin/cp $OVERLAY*.dts $CAPES
+/bin/cp $DTSI $KERNEL_DTSI
+/bin/cp * $PATH

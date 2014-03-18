@@ -72,4 +72,4 @@ __attribute__((section(".modinfo"))) =
 
 MODULE_ALIAS("of:N*T*CSaak,lcd-2.4*");
 
-MODULE_INFO(srcversion, "5DA6E05F4ADE2E776A47D97");
+MODULE_INFO(srcversion, "09B9491BC15C15265F0EE53");
